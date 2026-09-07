@@ -1,26 +1,20 @@
 'use client';
 
 import { useVitalix } from '@/src/context/VitalixContext';
-import { OverviewPage } from '@/src/components/OverviewPage';
+import { MedicationsPage } from '@/src/components/MedicationsPage';
 
-export default function Home() {
+export default function MedicationsRoute() {
   const {
-    vitals,
-    cycle,
-    diagnoses,
     prescriptions,
-    logs,
+    archivedPrescriptions,
     setActiveModal,
     handleNavigateToIntake,
   } = useVitalix();
 
   return (
-    <OverviewPage
-      vitals={vitals}
-      cycle={cycle}
-      diagnoses={diagnoses}
+    <MedicationsPage
       prescriptions={prescriptions}
-      logs={logs}
+      archivedPrescriptions={archivedPrescriptions}
       onOpenModal={setActiveModal}
       onNavigateToIntake={handleNavigateToIntake}
     />
