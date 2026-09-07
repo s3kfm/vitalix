@@ -1,20 +1,9 @@
 # Modal reference
 
-`Modals.tsx.txt` preserves the original AI Studio demo forms for design reference. It is not imported or compiled. The simulated clinical updates and refill submissions are not supported app features.
+`Modals.tsx.txt` preserves the original AI Studio demo for design reference only. It is not imported or compiled.
 
-The app reads fixtures directly and keeps UI state in the component using it. Action buttons for unimplemented record changes are disabled. Navigation uses Next links or `router.push`.
+The current app uses feature components under `src/components/medications`, `records`, `symptoms`, and `assistant`. Shared presentation components live in `ui`; navigation lives in `layout`.
 
-For a future implemented interaction, render `Modal` from `src/components/Modals.tsx` inside its owning client component:
+`HealthRecordsProvider` keeps demonstration records in memory across navigation. Entries and selected files reset on refresh. No backend, AI extraction, Bluetooth sync, prescription service, or persistence is connected.
 
-```tsx
-const [open, setOpen] = useState(false);
-
-return <>
-  <button onClick={() => setOpen(true)}>Open details</button>
-  {open && <Modal title="Details" onClose={() => setOpen(false)}>
-    <p>Modal content lives here.</p>
-  </Modal>}
-</>;
-```
-
-The native dialog provides focus containment, Escape dismissal, and focus restoration. Unmount it to close it; no global provider or modal registry is needed.
+Render `Modal` conditionally in the feature that owns the interaction. The native dialog provides focus containment, Escape dismissal, and focus restoration. Manual entry forms are reusable independently of the assistant. The assistant only previews messages and does not generate or save records.

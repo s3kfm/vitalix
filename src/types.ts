@@ -1,115 +1,90 @@
-export type PageTab = 'overview' | 'vitals-and-labs' | 'medications' | 'ai-intake';
-
-export interface VitalsData {
-  systolic: number;
-  diastolic: number;
-  heartRate: number;
-  bpStatus: string;
-  bpDelta: string;
-  restingHeartRate: number;
-  fastingGlucose: number;
-  fastingGlucoseStatus: string;
-  fastingGlucoseTime: string;
-  nonFastingGlucose: number;
-  nonFastingGlucoseStatus: string;
-  weight: number;
-  weightDelta: string;
-  height: string;
-  bmi: number;
-  targetWeight: number;
-  targetProgressPercent: number;
-  bodyFatPercent: number;
-  leanMuscleMass: number;
-  muscleDelta: string;
-}
-
-export interface CycleData {
-  cycleDay: number;
-  phase: string;
-  lengthDays: number;
-  regularity: string;
-  flow: 'Light' | 'Medium' | 'Heavy' | 'Spotting';
-  status: string;
-  symptoms: string[];
-}
-
-export interface Diagnosis {
+export interface Medicine {
   id: string;
   name: string;
-  tag: string;
-  tagColor: 'tertiary' | 'primary' | 'secondary' | 'error';
-  details: string;
-  icon: string;
-  status: 'active' | 'healing' | 'monitoring';
-}
-
-export interface Prescription {
-  id: string;
-  name: string;
-  type: 'maintenance' | 'acute' | 'prn';
-  dosage: string;
-  form?: string;
-  categoryBadge?: string;
-  instructions: string;
-  scheduleTimes: string[];
-  prescriber: string;
-  prescriberSpecialty: string;
-  pillsLeft?: number;
-  totalPills?: number;
-  refillDueText?: string;
-  supplyDaysText?: string;
-  pillSupplyStatus?: 'healthy' | 'warning' | 'alert';
-  currentDay?: number;
-  totalDays?: number;
-  progressPercent?: number;
-  daysRemainingText?: string;
-  targetCompletionDate?: string;
-  usageTodayText?: string;
-  maxDailyLimitText?: string;
-  status: 'active' | 'paused';
-}
-
-export interface ArchivedPrescription {
-  id: string;
-  name: string;
-  type: string;
-  started: string;
-  ended: string;
+  strength: string;
+  dose: string;
+  schedule: string[];
   notes: string;
-  prescriber: string;
-  status: 'completed' | 'discontinued';
+  active: boolean;
 }
-
-export interface Symptom {
+export interface DoseLog {
   id: string;
-  title: string;
-  severity: number;
-  severityMax: number;
-  severityLabel: string;
-  location: string;
-  onset: string;
-  status: 'active' | 'resolved';
-  description: string;
-  resolvedAt?: string;
-  resolvedBy?: string;
+  medicineId: string;
+  name: string;
+  dose: string;
+  takenAt: string;
+  status: DoseStatus;
+  scheduledTime?: string;
+  notes: string;
 }
-
-export interface HealthLogItem {
-  id: string;
-  category: 'vitals' | 'symptoms' | 'labs' | 'cycle' | 'medication';
-  title: string;
-  badge: string;
-  badgeType: 'emerald' | 'amber' | 'rose' | 'indigo' | 'cyan' | 'slate';
-  description: string;
-  timestamp: string;
-}
-
-export interface Biomarker {
+export interface Measurement {
   id: string;
   name: string;
   value: string;
   unit: string;
-  referenceRange: string;
-  category: string;
-  status: 'optimal' | 'normal' | 'elevated' | 'low';
+  recordedAt: string;
+  pinned: boolean;
+  notes: string;
+}
+export interface SymptomEntry {
+  id: string;
+  name: string;
+  recordedAt: string;
+  severity: number | null;
+  location: string;
+  notes: string;
+  ongoing: boolean;
+}
+export interface Report {
+  id: string;
+  name: string;
+  recordedAt: string;
+  file: File;
+}
+export interface LabResult {
+  id: string;
+  name: string;
+  value: string;
+  unit: string;
+  range: string;
+  recordedAt: string;
+}
+export interface ActivityEntry {
+  id: string;
+  category: 'Measurements' | 'Symptoms' | 'Medications' | 'Reports';
+  title: string;
+  detail: string;
+  recordedAt: string;
+}
+
+export type DoseStatus = 'Taken' | 'Skipped';
+export type NewMedicine = Omit<Medicine, 'id'>;
+export type NewMeasurement = Omit<Measurement, 'id'>;
+export type NewSymptomEntry = Omit<SymptomEntry, 'id'>;
+export type NewDoseLog = Omit<DoseLog, 'id'>;
+export type NewReport = Omit<Report, 'id'>;
+export type ActivityCategory = ActivityEntry['category'];
+
+export interface UserProfile {
+  displayName: string;
+  firstName: string;
+  initials: string;
+}
+
+export interface HealthRecordsContextValue {
+  medicines: Medicine[];
+  measurements: Measurement[];
+  symptoms: SymptomEntry[];
+  doses: DoseLog[];
+  reports: Report[];
+  activity: ActivityEntry[];
+  labs: LabResult[];
+  addMedicine: (medicine: NewMedicine) => void;
+  toggleMedicine: (id: Medicine['id']) => void;
+  addMeasurement: (measurement: NewMeasurement) => void;
+  togglePin: (name: Measurement['name']) => void;
+  addSymptom: (symptom: NewSymptomEntry) => void;
+  resolveSymptom: (id: SymptomEntry['id']) => void;
+  logDose: (dose: NewDoseLog) => void;
+  addReport: (report: NewReport) => void;
 }
