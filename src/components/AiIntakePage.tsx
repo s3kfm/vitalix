@@ -1,5 +1,6 @@
+'use client';
+
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Sparkles,
@@ -19,49 +20,36 @@ import {
   Check,
   Clock,
   Layers,
-  FileUp,
-  HelpCircle
 } from 'lucide-react';
 import {
   Biomarker,
-  Symptom,
-  CycleData,
-  HealthLogItem
 } from '../types';
 
 interface AiIntakePageProps {
   initialFilter?: string;
-  onConfirmExtractedRecords: (data: {
-    biomarkers: Biomarker[];
-    symptom: { title: string; severity: number; location: string; notes: string };
-    cycle: { flow: 'Medium'; day: number };
-  }) => void;
   prefilledPrompt?: string;
   autoStaged?: boolean;
 }
 
 export const AiIntakePage: React.FC<AiIntakePageProps> = ({
   initialFilter = 'all',
-  onConfirmExtractedRecords,
   prefilledPrompt = '',
   autoStaged = false
 }) => {
-  const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<string>(autoStaged ? 'state-3' : initialFilter);
   const [state1Text, setState1Text] = useState(prefilledPrompt);
   const [state3Text, setState3Text] = useState(
     prefilledPrompt || 'Please log that my period started today (medium flow, mild cramps) and save my blood work PDF.'
   );
-  const [stagedFileName, setStagedFileName] = useState('Quest_Comprehensive_Panel.pdf');
+  const [stagedFileName] = useState('Quest_Comprehensive_Panel.pdf');
   const [hasAttachment, setHasAttachment] = useState(true);
 
   // Date detection state
   const [detectedDate, setDetectedDate] = useState('Oct 24, 2024');
   const [isEditingDate, setIsEditingDate] = useState(false);
-  const [dateConfirmed, setDateConfirmed] = useState(true);
 
   // Extracted Biomarkers
-  const [biomarkers, setBiomarkers] = useState<Biomarker[]>([
+  const [biomarkers] = useState<Biomarker[]>([
     {
       id: 'bm-1',
       name: 'Fasting Blood Sugar',
@@ -90,30 +78,6 @@ export const AiIntakePage: React.FC<AiIntakePageProps> = ({
       status: 'optimal'
     }
   ]);
-
-  // Confirmation Success State
-  const [savedSuccess, setSavedSuccess] = useState(false);
-
-  const handleConfirmSave = () => {
-    onConfirmExtractedRecords({
-      biomarkers,
-      symptom: {
-        title: 'Mild Tension Headache',
-        severity: 4,
-        location: 'Frontal Forehead',
-        notes: 'Frontal tension recorded via AI Health Chat with 135 mg/dL glucose correlation.'
-      },
-      cycle: {
-        flow: 'Medium',
-        day: 1
-      }
-    });
-
-    setSavedSuccess(true);
-    setTimeout(() => {
-      router.push('/');
-    }, 1200);
-  };
 
   return (
     <div className="flex flex-col w-full pb-16">
@@ -222,17 +186,6 @@ export const AiIntakePage: React.FC<AiIntakePageProps> = ({
       </section>
 
       {/* Success Notification Banner */}
-      {savedSuccess && (
-        <div className="mb-6 p-4 rounded-xl bg-[#5a6344]/15 border border-[#5a6344]/30 text-[#3a3530] flex items-center justify-between animate-in fade-in slide-in-from-top-2">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="w-5 h-5 text-[#5a6344]" />
-            <span className="text-xs sm:text-sm font-semibold">
-              Medical records successfully confirmed and synchronized with Jane Doe's official chart!
-            </span>
-          </div>
-          <span className="font-mono-data text-xs text-[#5a6344] font-semibold">Returning to Overview...</span>
-        </div>
-      )}
 
       {/* 2. Interactive State Gallery Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -360,7 +313,7 @@ export const AiIntakePage: React.FC<AiIntakePageProps> = ({
                     LH / OPK Strips
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full bg-white border border-[#e8e4db] font-mono-data text-[10px] text-[#3a3530] font-semibold shadow-2xs">
-                    Doctor's Notes
+                    Doctor&apos;s Notes
                   </span>
                 </div>
               </div>
@@ -743,7 +696,7 @@ export const AiIntakePage: React.FC<AiIntakePageProps> = ({
                         </span>
                       </div>
                       <p className="text-xs text-[#3a3530] mt-0.5">
-                        Also tracks: "My period ended today" to automatically record period duration
+                        Also tracks: &quot;My period ended today&quot; to automatically record period duration
                       </p>
                     </div>
                   </div>
@@ -755,7 +708,7 @@ export const AiIntakePage: React.FC<AiIntakePageProps> = ({
                 <div className="flex items-center gap-2 text-[#7d756d]">
                   <ShieldCheck className="w-4 h-4 text-[#5a6344] shrink-0" />
                   <span className="text-xs">
-                    All entries are encrypted and tagged with Jane Doe's verified patient record.
+                    All entries are encrypted and tagged with Jane Doe&apos;s verified patient record.
                   </span>
                 </div>
 
@@ -775,7 +728,7 @@ export const AiIntakePage: React.FC<AiIntakePageProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={handleConfirmSave}
+                    disabled
                     className="px-5 py-2.5 rounded-lg bg-[#5a6344] text-[#fcf9f5] text-xs font-semibold hover:bg-[#4a5237] transition-all shadow-xs hover:shadow-md flex items-center gap-2 active:scale-95"
                   >
                     <CheckCircle2 className="w-4 h-4" />
@@ -883,7 +836,7 @@ export const AiIntakePage: React.FC<AiIntakePageProps> = ({
               </h4>
             </div>
             <p className="text-xs text-[#7d756d] mb-4">
-              Type everyday phrasing: <em>"Tension headache since noon, feels like a 4 out of 10."</em>
+              Type everyday phrasing: <em>&quot;Tension headache since noon, feels like a 4 out of 10.&quot;</em>
             </p>
             <div className="bg-[#f4f1eb] rounded-lg p-3 space-y-2 text-xs text-[#6c655c]">
               <div className="flex items-start gap-2">
@@ -921,7 +874,7 @@ export const AiIntakePage: React.FC<AiIntakePageProps> = ({
               </h4>
             </div>
             <p className="text-xs text-[#7d756d] mb-4">
-              Type everyday phrases: <em>"I had my period today"</em> or <em>"My period ended today, medium flow."</em>
+              Type everyday phrases: <em>&quot;I had my period today&quot;</em> or <em>&quot;My period ended today, medium flow.&quot;</em>
             </p>
             <div className="bg-[#f4f1eb] rounded-lg p-3 space-y-2 text-xs text-[#6c655c]">
               <div className="flex items-start gap-2">

@@ -1,19 +1,21 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { Paperclip, ArrowUp, Sparkles } from 'lucide-react';
 
 interface AssistantInputBarProps {
   variant?: 'hero' | 'compact';
-  onNavigateToIntake: (prefilledText?: string, autoStage?: boolean) => void;
 }
 
 export const AssistantInputBar: React.FC<AssistantInputBarProps> = ({
-  variant = 'hero',
-  onNavigateToIntake
+  variant = 'hero'
 }) => {
+  const router = useRouter();
   const [text, setText] = useState('');
 
   const handleSend = () => {
-    onNavigateToIntake(text, text.toLowerCase().includes('period') || text.toLowerCase().includes('lab'));
+    router.push('/ai-intake');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -24,7 +26,7 @@ export const AssistantInputBar: React.FC<AssistantInputBarProps> = ({
   };
 
   const handleAttachClick = () => {
-    onNavigateToIntake(text, true);
+    router.push('/ai-intake');
   };
 
   if (variant === 'compact') {
@@ -96,7 +98,7 @@ export const AssistantInputBar: React.FC<AssistantInputBarProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => onNavigateToIntake(text)}
+              onClick={() => router.push('/ai-intake')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#e8e4db] hover:bg-[#f4f1eb] text-[#544d44] text-xs font-medium transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#5a6344]" />

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import {
   Prescription,
@@ -8,31 +10,23 @@ import {
   Pill,
   Search,
   Plus,
-  SlidersHorizontal,
   Clock,
   AlertTriangle,
   Building2,
-  Calendar,
   Sun,
   Moon,
   RotateCcw,
   Wind,
-  ShieldCheck,
-  CheckCircle2
 } from 'lucide-react';
 
 interface MedicationsPageProps {
   prescriptions: Prescription[];
   archivedPrescriptions: ArchivedPrescription[];
-  onOpenModal: (modalName: string) => void;
-  onNavigateToIntake: (prefilledText?: string, autoStage?: boolean) => void;
 }
 
 export const MedicationsPage: React.FC<MedicationsPageProps> = ({
   prescriptions,
   archivedPrescriptions,
-  onOpenModal,
-  onNavigateToIntake
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'maintenance' | 'acute' | 'prn'>('all');
@@ -60,7 +54,7 @@ export const MedicationsPage: React.FC<MedicationsPageProps> = ({
       {/* 1. Assistant Input Bar (Compact) */}
       <AssistantInputBar
         variant="compact"
-        onNavigateToIntake={onNavigateToIntake}
+
       />
 
       {/* 2. Page Header & Actions */}
@@ -96,7 +90,7 @@ export const MedicationsPage: React.FC<MedicationsPageProps> = ({
           <div className="relative">
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as any)}
+              onChange={(e) => setFilterType(e.target.value as typeof filterType)}
               className="h-9 px-3 bg-white hover:bg-[#f4f1eb] border border-[#e8e4db] rounded-xl text-xs font-medium text-[#3a3530] focus:outline-none transition-colors shadow-xs cursor-pointer"
             >
               <option value="all">All Types</option>
@@ -108,7 +102,7 @@ export const MedicationsPage: React.FC<MedicationsPageProps> = ({
 
           <button
             type="button"
-            onClick={() => onOpenModal('add-prescription')}
+            disabled
             className="h-9 px-4 bg-[#5a6344] text-white hover:bg-[#4a5237] text-xs font-medium rounded-xl flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -158,7 +152,7 @@ export const MedicationsPage: React.FC<MedicationsPageProps> = ({
         {/* Pill 3: Refill Alert with Click Action */}
         <button
           type="button"
-          onClick={() => onOpenModal('request-refill')}
+          disabled
           className="bg-white border border-amber-200/80 rounded-2xl p-4 flex items-center gap-3 shadow-xs hover:border-amber-300 transition-colors text-left group cursor-pointer"
         >
           <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-800 shrink-0 group-hover:scale-105 transition-transform border border-amber-200/60">
@@ -299,7 +293,7 @@ export const MedicationsPage: React.FC<MedicationsPageProps> = ({
 
                   <button
                     type="button"
-                    onClick={() => onOpenModal('request-refill')}
+                    disabled
                     className="px-3.5 py-1.5 bg-[#f4f1eb] hover:bg-[#e8e4db] text-[#3a3530] text-xs font-medium rounded-xl border border-[#e8e4db] shadow-2xs transition-colors shrink-0 cursor-pointer"
                   >
                     Refill

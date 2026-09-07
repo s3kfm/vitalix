@@ -1,3 +1,6 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import {
   VitalsData,
@@ -5,37 +8,25 @@ import {
 } from '../types';
 import { AssistantInputBar } from './AssistantInputBar';
 import {
-  Activity,
-  Heart,
   Scale,
   Calendar,
   Upload,
   PlusCircle,
-  TrendingDown,
   CheckCircle,
-  FileText,
   AlertTriangle,
-  Flame,
-  Check,
   Edit,
-  Clock
 } from 'lucide-react';
 
 interface VitalsLabsPageProps {
   vitals: VitalsData;
   symptoms: Symptom[];
-  onResolveSymptom: (id: string) => void;
-  onOpenModal: (modalName: string) => void;
-  onNavigateToIntake: (prefilledText?: string, autoStage?: boolean) => void;
 }
 
 export const VitalsLabsPage: React.FC<VitalsLabsPageProps> = ({
   vitals,
   symptoms,
-  onResolveSymptom,
-  onOpenModal,
-  onNavigateToIntake
 }) => {
+  const router = useRouter();
   const [dateRange, setDateRange] = useState('30');
   const [symptomTab, setSymptomTab] = useState<'active' | 'resolved'>('active');
 
@@ -47,7 +38,7 @@ export const VitalsLabsPage: React.FC<VitalsLabsPageProps> = ({
       {/* 1. Assistant Input Bar (Compact) */}
       <AssistantInputBar
         variant="compact"
-        onNavigateToIntake={onNavigateToIntake}
+
       />
 
       {/* 2. Page Header & Action Controls */}
@@ -89,7 +80,7 @@ export const VitalsLabsPage: React.FC<VitalsLabsPageProps> = ({
           {/* Action Buttons */}
           <button
             type="button"
-            onClick={() => onNavigateToIntake('', true)}
+            onClick={() => router.push('/ai-intake')}
             className="flex items-center gap-1.5 px-4 py-2 bg-[#f4f1eb] hover:bg-[#e8e4db] text-[#3a3530] text-xs font-medium rounded-xl border border-[#e8e4db] shadow-2xs transition-colors cursor-pointer"
           >
             <Upload className="w-4 h-4 text-[#5a6344]" />
@@ -98,7 +89,7 @@ export const VitalsLabsPage: React.FC<VitalsLabsPageProps> = ({
 
           <button
             type="button"
-            onClick={() => onOpenModal('log-vitals')}
+            disabled
             className="flex items-center gap-1.5 px-4 py-2 bg-[#5a6344] hover:bg-[#4a5237] text-white text-xs font-medium rounded-xl shadow-xs transition-colors cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
@@ -214,7 +205,7 @@ export const VitalsLabsPage: React.FC<VitalsLabsPageProps> = ({
           </div>
           <button
             type="button"
-            onClick={() => onOpenModal('record-weighin')}
+            disabled
             className="self-start sm:self-auto flex items-center gap-1.5 px-4 py-2 bg-[#f4f1eb] hover:bg-[#e8e4db] text-[#3a3530] text-xs font-medium rounded-xl border border-[#e8e4db] transition-colors cursor-pointer"
           >
             <PlusCircle className="w-3.5 h-3.5 text-[#5a6344]" />
@@ -286,7 +277,7 @@ export const VitalsLabsPage: React.FC<VitalsLabsPageProps> = ({
           </div>
           <button
             type="button"
-            onClick={() => onOpenModal('log-symptom')}
+            disabled
             className="self-start sm:self-auto flex items-center gap-1.5 px-4 py-2 bg-[#5a6344] hover:bg-[#4a5237] text-white text-xs font-medium rounded-xl shadow-xs transition-colors cursor-pointer"
           >
             <AlertTriangle className="w-4 h-4" />
@@ -386,7 +377,7 @@ export const VitalsLabsPage: React.FC<VitalsLabsPageProps> = ({
                   <div className="flex items-center justify-between pt-1 border-t border-[#e8e4db]">
                     <button
                       type="button"
-                      onClick={() => onOpenModal('log-symptom')}
+                      disabled
                       className="text-[#5a6344] text-xs font-medium hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <Edit className="w-3.5 h-3.5" />
@@ -394,7 +385,7 @@ export const VitalsLabsPage: React.FC<VitalsLabsPageProps> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => onResolveSymptom(sym.id)}
+                      disabled
                       className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-[#f4f1eb] text-[#5a6344] text-xs font-medium rounded-xl border border-[#e8e4db] shadow-2xs transition-colors cursor-pointer"
                     >
                       <CheckCircle className="w-3.5 h-3.5" />

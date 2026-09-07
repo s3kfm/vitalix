@@ -1,15 +1,16 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import {
   VitalsData,
   CycleData,
   Diagnosis,
-  Prescription,
   HealthLogItem
 } from '../types';
 import { AssistantInputBar } from './AssistantInputBar';
 import {
   Activity,
-  Heart,
   TrendingDown,
   TrendingUp,
   Scale,
@@ -24,7 +25,6 @@ import {
   CheckCircle2,
   Droplet,
   Flame,
-  ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -32,21 +32,16 @@ interface OverviewPageProps {
   vitals: VitalsData;
   cycle: CycleData;
   diagnoses: Diagnosis[];
-  prescriptions: Prescription[];
   logs: HealthLogItem[];
-  onOpenModal: (modalName: string) => void;
-  onNavigateToIntake: (prefilledText?: string, autoStage?: boolean) => void;
 }
 
 export const OverviewPage: React.FC<OverviewPageProps> = ({
   vitals,
   cycle,
   diagnoses,
-  prescriptions,
   logs,
-  onOpenModal,
-  onNavigateToIntake
 }) => {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<'all' | 'vitals' | 'symptoms' | 'labs' | 'cycle'>('all');
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
 
@@ -60,7 +55,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
       {/* 1. Assistant Input Prompt Card */}
       <AssistantInputBar
         variant="hero"
-        onNavigateToIntake={onNavigateToIntake}
+
       />
 
       {/* 2. Core Vitals & Biometrics Grid (4 KPI Cards) */}
@@ -323,7 +318,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </div>
             <button
               type="button"
-              onClick={() => onOpenModal('log-symptom')}
+              disabled
               className="shrink-0 px-3 py-1 bg-white hover:bg-[#f4f1eb] text-[#3a3530] text-xs font-medium rounded-xl border border-[#e8e4db] shadow-2xs transition-colors cursor-pointer"
             >
               + Note
@@ -402,7 +397,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
               </div>
               <button
                 type="button"
-                onClick={() => onOpenModal('request-refill')}
+                disabled
                 className="shrink-0 px-3.5 py-1.5 bg-[#5a6344] hover:bg-[#4a5237] text-white text-xs font-medium rounded-xl shadow-xs transition-colors cursor-pointer"
               >
                 Request Refill
@@ -516,10 +511,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </div>
 
             <button
-              onClick={() => {
-                setQuickMenuOpen(false);
-                onOpenModal('log-vitals');
-              }}
+              disabled
               className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-[#f4f1eb] text-left transition-colors cursor-pointer"
             >
               <div className="w-8 h-8 rounded-lg bg-[#e8e4db] text-[#5a6344] flex items-center justify-center shrink-0">
@@ -532,10 +524,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </button>
 
             <button
-              onClick={() => {
-                setQuickMenuOpen(false);
-                onOpenModal('log-symptom');
-              }}
+              disabled
               className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-[#f4f1eb] text-left transition-colors cursor-pointer"
             >
               <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
@@ -548,10 +537,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             </button>
 
             <button
-              onClick={() => {
-                setQuickMenuOpen(false);
-                onOpenModal('record-weighin');
-              }}
+              disabled
               className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-[#f4f1eb] text-left transition-colors cursor-pointer"
             >
               <div className="w-8 h-8 rounded-lg bg-[#e8e4db] text-[#5a6344] flex items-center justify-center shrink-0">
@@ -566,7 +552,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
             <button
               onClick={() => {
                 setQuickMenuOpen(false);
-                onNavigateToIntake('', true);
+                router.push('/ai-intake');
               }}
               className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-[#f4f1eb] text-left transition-colors cursor-pointer"
             >

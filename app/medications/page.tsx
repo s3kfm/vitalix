@@ -1,22 +1,6 @@
-'use client';
-
-import { useVitalix } from '@/src/context/VitalixContext';
 import { MedicationsPage } from '@/src/components/MedicationsPage';
+import { initialPrescriptions, initialArchivedPrescriptions } from '@/src/data/initialData';
 
-export default function MedicationsRoute() {
-  const {
-    prescriptions,
-    archivedPrescriptions,
-    setActiveModal,
-    handleNavigateToIntake,
-  } = useVitalix();
-
-  return (
-    <MedicationsPage
-      prescriptions={prescriptions}
-      archivedPrescriptions={archivedPrescriptions}
-      onOpenModal={setActiveModal}
-      onNavigateToIntake={handleNavigateToIntake}
-    />
-  );
+export default function Page() {
+  return <MedicationsPage prescriptions={initialPrescriptions} archivedPrescriptions={initialArchivedPrescriptions} />;
 }

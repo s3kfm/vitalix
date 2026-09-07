@@ -1,11 +1,11 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search, Bell, Sparkles } from 'lucide-react';
 
 interface HeaderProps {
-  onOpenSearch: () => void;
-  onOpenNotifications: () => void;
   unreadCount?: number;
 }
 
@@ -25,8 +25,6 @@ const tabs: TabDef[] = [
 ];
 
 export const Header: React.FC<HeaderProps> = ({
-  onOpenSearch,
-  onOpenNotifications,
   unreadCount = 1
 }) => {
   const pathname = usePathname();
@@ -57,12 +55,12 @@ export const Header: React.FC<HeaderProps> = ({
             <input
               type="text"
               readOnly
-              onClick={onOpenSearch}
+              aria-disabled="true"
               placeholder="Search vitals, symptoms, meds..."
               className="w-72 h-9 pl-9 pr-14 bg-[#fcf9f5] hover:bg-white border border-[#e8e4db] rounded-xl text-xs text-[#3a3530] placeholder:text-[#7a7267] focus:outline-none focus:border-[#5a6344] transition-all cursor-pointer shadow-2xs"
             />
             <div
-              onClick={onOpenSearch}
+              aria-disabled="true"
               className="absolute right-2 flex items-center px-1.5 py-0.5 bg-[#f4f1eb] rounded border border-[#e8e4db] text-[10px] font-mono-data text-[#7a7267] cursor-pointer shadow-2xs"
             >
               ⌘K
@@ -102,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right: Notifications & Patient Profile */}
         <div className="flex items-center gap-3">
           <button
-            onClick={onOpenNotifications}
+            aria-disabled="true"
             className="relative p-2 rounded-xl text-[#7a7267] hover:bg-[#e8e4db]/50 hover:text-[#3a3530] transition-colors"
             title="Notifications"
             type="button"

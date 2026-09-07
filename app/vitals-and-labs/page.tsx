@@ -1,24 +1,6 @@
-'use client';
-
-import { useVitalix } from '@/src/context/VitalixContext';
 import { VitalsLabsPage } from '@/src/components/VitalsLabsPage';
+import { initialVitals, initialSymptoms } from '@/src/data/initialData';
 
-export default function VitalsAndLabsRoute() {
-  const {
-    vitals,
-    symptoms,
-    handleResolveSymptom,
-    setActiveModal,
-    handleNavigateToIntake,
-  } = useVitalix();
-
-  return (
-    <VitalsLabsPage
-      vitals={vitals}
-      symptoms={symptoms}
-      onResolveSymptom={handleResolveSymptom}
-      onOpenModal={setActiveModal}
-      onNavigateToIntake={handleNavigateToIntake}
-    />
-  );
+export default function Page() {
+  return <VitalsLabsPage vitals={initialVitals} symptoms={initialSymptoms} />;
 }
