@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Activity } from 'lucide-react';
@@ -17,7 +18,7 @@ const navigation: readonly NavigationItem[] = [
   { href: '/medications', label: 'Medications' },
 ];
 
-export function Header({ profile }: { profile: UserProfile }) {
+export function Header({ profile, children }: { profile: UserProfile; children?: ReactNode }) {
   const pathname = usePathname();
 
   return (
@@ -46,6 +47,7 @@ export function Header({ profile }: { profile: UserProfile }) {
             <small>Personal health record</small>
           </div>
         </div>
+        {children}
       </div>
     </header>
   );
