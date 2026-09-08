@@ -8,23 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "node --import tsx scripts/migrate.ts",
-    "test:measurements": "node --import tsx --test src/lib/measurements/*.test.ts",
-    "test:api": "node --import tsx tests/api/measurements.test.ts"
+    "test:measurements": "node --import tsx --test src/lib/measurements/*.test.ts src/lib/recordValidation.test.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.1",
     "@tanstack/react-query": "^5.102.8",
-    "axios": "^1.20.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^1.0.0-rc.4",
-    "formik": "^2.4.9",
     "lucide-react": "^1.41.0",
     "next": "16.3.4",
     "pg": "^8.23.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "react-query-fetcher": "^0.0.1",
-    "yup": "^1.7.1"
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
