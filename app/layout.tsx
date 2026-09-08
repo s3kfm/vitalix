@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <main id="main-content">{children}</main>
                   <footer>
                     <span>Vitalix · Your personal health record</span>
-                    <span>Demo workspace · Changes reset on refresh</span>
+                    <span>Demo workspace</span>
                   </footer>
                 </div>
               </div>

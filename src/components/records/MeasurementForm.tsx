@@ -19,7 +19,7 @@ export function MeasurementForm({ onSuccess, onCancel, onPendingChange }: { onSu
   const container = useRef<HTMLFormElement>(null);
   const queryClient = useQueryClient();
   const toastId = useRef<string | number | undefined>(undefined);
-  const definitions = useQuery({
+  const definitions = useQuery<Definition[]>({
     queryKey: ["measurements", "definitions"],
   });
   const mutation = useMutation({
