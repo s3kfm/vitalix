@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import 'rsuite/dist/rsuite-no-reset.min.css';
+import '../src/rsuite-theme.css';
+import { CustomProvider } from 'rsuite';
 import { Header } from '@/src/components/layout/Header';
 import { AssistantBubble } from '@/src/components/assistant/AssistantBubble';
 import { Providers } from '@/src/providers';
@@ -20,22 +23,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <Providers>
-          <HealthRecordsProvider>
-            <a className="skip-link" href="#main-content">Skip to content</a>
-            <div className="app-shell">
-              <Header profile={demoProfile} />
-              <div className="main-shell">
-                <main id="main-content">{children}</main>
-                <footer>
-                  <span>Vitalix · Your personal health record</span>
-                  <span>Demo workspace · Changes reset on refresh</span>
-                </footer>
+        <CustomProvider>
+          <Providers>
+            <HealthRecordsProvider>
+              <a className="skip-link" href="#main-content">Skip to content</a>
+              <div className="app-shell">
+                <Header profile={demoProfile} />
+                <div className="main-shell">
+                  <main id="main-content">{children}</main>
+                  <footer>
+                    <span>Vitalix · Your personal health record</span>
+                    <span>Demo workspace · Changes reset on refresh</span>
+                  </footer>
+                </div>
               </div>
-            </div>
-            <AssistantBubble />
-          </HealthRecordsProvider>
-        </Providers>
+              <AssistantBubble />
+            </HealthRecordsProvider>
+          </Providers>
+        </CustomProvider>
       </body>
     </html>
   );

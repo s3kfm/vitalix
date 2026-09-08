@@ -1,0 +1,417 @@
+/* ==========================================================================
+   rsuite theme overrides — maps Vitalix earthy palette onto rsuite variables
+   ========================================================================== */
+
+/* ---- Primary: swap blue for Vitalix green ---- */
+:root {
+  --rs-primary-50:  #f0f3ec;
+  --rs-primary-100: #dce2d1;
+  --rs-primary-200: #c4cfb1;
+  --rs-primary-300: #a7b78c;
+  --rs-primary-400: #8b9f6d;
+  --rs-primary-500: #5a6344;   /* --green */
+  --rs-primary-600: #4e563a;
+  --rs-primary-700: #424931;
+  --rs-primary-800: #363c28;
+  --rs-primary-900: #2a2f1f;
+
+  /* ---- Gray ramp: warm neutrals derived from --ink / --muted ---- */
+  --rs-gray-0:   #fcf9f5;   /* --canvas */
+  --rs-gray-50:  #f4f1eb;   /* --surface-soft */
+  --rs-gray-100: #ebe7df;
+  --rs-gray-200: #e8e4db;   /* --line */
+  --rs-gray-300: #d5d0c6;
+  --rs-gray-400: #b5afa4;
+  --rs-gray-500: #969084;
+  --rs-gray-600: #7a7267;   /* --muted */
+  --rs-gray-700: #5f574d;
+  --rs-gray-800: #4a433a;
+  --rs-gray-900: #3a3530;   /* --ink */
+
+  /* ---- Semantic palette (keep close to defaults but warm-toned) ---- */
+  --rs-color-red:    #c1533f;
+  --rs-color-orange: #d4843a;
+  --rs-color-yellow: #c79b35;
+  --rs-color-green:  #5a6344;
+  --rs-color-cyan:   #4f9d9a;
+  --rs-color-blue:   #5b7faa;
+  --rs-color-violet: #7b6d9a;
+/* ---- Extended palette ramps ---- */
+  --rs-red-50:    #fdf0ed;  --rs-red-100:    #f9d9d2;
+  --rs-red-200:    #f4bdb0;  --rs-red-300:    #ee9f8d;
+  --rs-red-400:    #e7806a;  --rs-red-500:    #c1533f;
+  --rs-red-600:    #a84635;  --rs-red-700:    #8e3a2c;
+  --rs-red-800:    #732e23;  --rs-red-900:    #58221a;
+
+  --rs-orange-50:  #fdf2e6;  --rs-orange-100: #f9dbbc;
+  --rs-orange-200: #f5c292;  --rs-orange-300: #f0a868;
+  --rs-orange-400: #e88e44;  --rs-orange-500: #d4843a;
+  --rs-orange-600: #b87031;  --rs-orange-700: #9c5d29;
+  --rs-orange-800: #7f4a20;  --rs-orange-900: #623718;
+
+  --rs-yellow-50:  #fdf8e8;  --rs-yellow-100: #f9ebbf;
+  --rs-yellow-200: #f4de97;  --rs-yellow-300: #eecf6e;
+  --rs-yellow-400: #e5bd4a;  --rs-yellow-500: #c79b35;
+  --rs-yellow-600: #aa832b;  --rs-yellow-700: #8e6c23;
+  --rs-yellow-800: #72551a;  --rs-yellow-900: #563f12;
+
+  --rs-green-50:   #f0f3ec;  --rs-green-100:  #dce2d1;
+  --rs-green-200:   #c4cfb1;  --rs-green-300:  #a7b78c;
+  --rs-green-400:   #8b9f6d;  --rs-green-500:  #5a6344;
+  --rs-green-600:   #4e563a;  --rs-green-700:  #424931;
+  --rs-green-800:   #363c28;  --rs-green-900:  #2a2f1f;
+
+  --rs-cyan-50:    #edf6f5;  --rs-cyan-100:   #cde5e3;
+  --rs-cyan-200:   #abd2cf;  --rs-cyan-300:   #87bdba;
+  --rs-cyan-400:   #68a9a5;  --rs-cyan-500:   #4f9d9a;
+  --rs-cyan-600:   #438784;  --rs-cyan-700:   #38716e;
+  --rs-cyan-800:   #2d5b59;  --rs-cyan-900:   #224544;
+
+  --rs-blue-50:    #eef3f8;  --rs-blue-100:   #cfddec;
+  --rs-blue-200:   #aec5dd;  --rs-blue-300:   #8bacce;
+  --rs-blue-400:   #6b93bd;  --rs-blue-500:   #5b7faa;
+  --rs-blue-600:   #4d6c93;  --rs-blue-700:   #405a7b;
+  --rs-blue-800:   #334863;  --rs-blue-900:   #26364b;
+
+  --rs-violet-50:  #f2eff7;  --rs-violet-100: #ddd5e9;
+  --rs-violet-200: #c7b9da;  --rs-violet-300: #af9bca;
+  --rs-violet-400: #957cb8;  --rs-violet-500: #7b6d9a;
+  --rs-violet-600: #695c84;  --rs-violet-700: #574b6d;
+  --rs-violet-800: #453b57;  --rs-violet-900: #332b41;
+
+  /* ---- Body / backgrounds ---- */
+  --rs-body:            var(--rs-gray-0);      /* canvas */
+  --rs-body-200:        var(--rs-gray-300);
+  --rs-body-800:        var(--rs-gray-900);    /* ink */
+  --rs-bg-card:         var(--rs-gray-0);
+  --rs-bg-well:         var(--rs-gray-50);     /* surface-soft */
+  --rs-bg-overlay:      var(--rs-gray-0);
+  --rs-bg-backdrop:     rgb(from var(--rs-gray-900) r g b / 30%);
+  --rs-bg-active:       var(--rs-primary-500);
+  --rs-bg-success:      #eef2e6;
+  --rs-bg-info:         #edf1f5;
+  --rs-bg-warning:      #faf5e8;
+  --rs-bg-error:        #f9ede8;
+
+  /* ---- Text ---- */
+  --rs-text-color:      var(--rs-gray-900);
+  --rs-text-primary:    var(--rs-gray-900);
+  --rs-text-secondary:  var(--rs-gray-600);
+  --rs-text-tertiary:   var(--rs-gray-500);
+  --rs-text-heading:    var(--rs-gray-900);
+  --rs-text-heading-inverse: var(--rs-gray-0);
+  --rs-text-link:       var(--rs-primary-500);
+  --rs-text-link-hover: var(--rs-primary-700);
+  --rs-text-link-active:var(--rs-primary-800);
+  --rs-text-active:     var(--rs-primary-500);
+  --rs-text-inverse:    var(--rs-gray-0);
+  --rs-text-disabled:   var(--rs-gray-400);
+  --rs-text-error:      var(--rs-color-red);
+  --rs-text-highlight-bg: #fff9c4;
+
+  /* ---- Borders ---- */
+  --rs-border-primary:   var(--rs-gray-200);   /* --line */
+  --rs-border-secondary: var(--rs-gray-100);
+
+  /* ---- Radii: match Vitalix rounded style ---- */
+  --rs-radius-none:   0;
+  --rs-radius-xs:     4px;
+  --rs-radius-sm:     6px;
+  --rs-radius-md:     8px;
+  --rs-radius-lg:     12px;
+  --rs-radius-xl:     16px;
+  --rs-radius-2xl:    20px;
+  --rs-radius-3xl:    24px;
+  --rs-radius-full:   9999px;
+
+  /* ---- Shadows: softer, warmer ---- */
+  --rs-shadow-none:     none;
+  --rs-shadow-xs:       0 1px 2px rgb(58 53 48 / 0.05);
+  --rs-shadow-sm:       0 1px 3px rgb(58 53 48 / 0.06);
+  --rs-shadow-md:       0 2px 6px rgb(58 53 48 / 0.08);
+  --rs-shadow-lg:       0 4px 12px rgb(58 53 48 / 0.10);
+  --rs-shadow-xl:       0 8px 24px rgb(58 53 48 / 0.12);
+  --rs-shadow-2xl:      0 12px 36px rgb(58 53 48 / 0.15);
+
+  /* ---- Font ---- */
+  --rs-font-family-base:      var(--font-geist-sans), -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --rs-font-family-monospace: var(--font-geist-mono), SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --rs-html-font-size:        14px;
+  --rs-font-size-base:        var(--rs-font-size-sm);
+
+  /* ---- Weights ---- */
+  --rs-text-weight-thin:       100;
+  --rs-text-weight-light:      300;
+  --rs-text-weight-regular:    400;
+  --rs-text-weight-medium:     500;
+  --rs-text-weight-semibold:   600;
+  --rs-text-weight-bold:       650;
+  --rs-text-weight-extrabold:  800;
+  --rs-text-max-lines:         3;
+
+  /* ---- Links ---- */
+  --rs-link-hover-decoration:  underline;
+  --rs-link-active-decoration: underline;
+
+  /* ---- State ---- */
+  --rs-state-success:       var(--rs-primary-500);
+  --rs-state-info:          var(--rs-color-blue);
+  --rs-state-warning:       var(--rs-color-yellow);
+  --rs-state-error:         var(--rs-color-red);
+  --rs-state-hover-bg:      var(--rs-primary-50);
+  --rs-state-focus-shadow:  0 0 0 2px rgb(from var(--rs-primary-500) r g b / 25%);
+  --rs-state-focus-outline: 2px solid rgb(from var(--rs-primary-500) r g b / 25%);
+  --rs-state-error-outline: 2px solid rgb(from var(--rs-color-red) r g b / 25%);
+
+  /* ---- Misc ---- */
+  --rs-scale:            1;
+  --rs-cursor-disabled:  not-allowed;
+  --rs-ripple-bg:        rgb(0 0 0 / 20%);
+  --rs-loader-default-size: 1.125rem;
+/* ==================================================================
+     Component-level overrides
+     ================================================================== */
+
+  /* ---- Button ---- */
+  --rs-btn-default-bg:                var(--rs-gray-50);
+  --rs-btn-default-text:              var(--rs-gray-800);
+  --rs-btn-default-hover-bg:          var(--rs-gray-200);
+  --rs-btn-default-hover-text:        var(--rs-gray-900);
+  --rs-btn-default-active-bg:         var(--rs-gray-300);
+  --rs-btn-default-active-text:       var(--rs-gray-900);
+  --rs-btn-default-border-color:      var(--rs-gray-200);
+  --rs-btn-default-disabled-bg:       var(--rs-gray-50);
+  --rs-btn-default-disabled-text:     var(--rs-gray-400);
+  --rs-btn-default-disabled-border-color: var(--rs-gray-100);
+
+  --rs-btn-primary-bg:           var(--rs-primary-500);
+  --rs-btn-primary-text:         #fff;
+  --rs-btn-primary-hover-bg:     var(--rs-primary-700);
+  --rs-btn-primary-active-bg:    var(--rs-primary-800);
+  --rs-btn-primary-border-color: var(--rs-primary-600);
+
+  --rs-btn-subtle-text:          var(--rs-primary-500);
+  --rs-btn-subtle-hover-bg:      var(--rs-primary-50);
+  --rs-btn-subtle-hover-text:    var(--rs-primary-700);
+  --rs-btn-subtle-active-bg:     var(--rs-primary-100);
+  --rs-btn-subtle-active-text:   var(--rs-primary-800);
+  --rs-btn-subtle-disabled-text: var(--rs-gray-400);
+  --rs-btn-subtle-disabled-bg:   transparent;
+
+  --rs-btn-ghost-border:          var(--rs-primary-500);
+  --rs-btn-ghost-text:            var(--rs-primary-500);
+  --rs-btn-ghost-border-width:    1px;
+  --rs-btn-ghost-hover-border:    var(--rs-primary-700);
+  --rs-btn-ghost-hover-text:      var(--rs-primary-700);
+  --rs-btn-ghost-active-border:   var(--rs-primary-800);
+  --rs-btn-ghost-active-text:     var(--rs-primary-800);
+
+  --rs-btn-link-text:        var(--rs-primary-500);
+  --rs-btn-link-hover-text:  var(--rs-primary-700);
+  --rs-btn-link-active-text: var(--rs-primary-800);
+  --rs-focus-ring-color:    rgb(from var(--rs-primary-500) r g b / 25%);
+  --rs-kbd-bg:              var(--rs-gray-50);
+  --rs-kbd-text:            var(--rs-gray-800);
+  --rs-kbd-border:          var(--rs-gray-200);
+  --rs-scrollbar-bg:        transparent;
+/* ---- Input ---- */
+  --rs-input-bg:                       #fff;
+  --rs-input-bg-disabled:              var(--rs-gray-50);
+  --rs-input-color:                    var(--rs-gray-900);
+  --rs-input-border-color:             var(--rs-gray-200);
+  --rs-input-border-hover-color:       var(--rs-primary-300);
+  --rs-input-border-focus-color:       var(--rs-primary-500);
+  --rs-input-border-error-color:       var(--rs-color-red);
+  --rs-input-border-radius:            var(--rs-radius-md);
+  --rs-input-padding-inline:           12px;
+  --rs-input-padding-block:            10px;
+  --rs-input-placeholder-color:        var(--rs-gray-400);
+  --rs-input-group-addon-bg:           var(--rs-gray-50);
+  --rs-input-group-addon-border-color: var(--rs-gray-200);
+
+  /* ---- Close button ---- */
+  --rs-close-button-color:       var(--rs-gray-500);
+  --rs-close-button-hover-color: var(--rs-gray-800);
+
+  /* ---- Divider ---- */
+  --rs-divider-border-color: var(--rs-gray-200);
+
+  /* ---- Loader ---- */
+  --rs-loader-ring:  var(--rs-gray-200);
+  --rs-loader-rotor: var(--rs-gray-500);
+  --rs-loader-ring-inverse:  rgb(from var(--rs-gray-0) r g b / 30%);
+  --rs-loader-rotor-inverse: var(--rs-gray-0);
+
+  /* ---- Progress ---- */
+  --rs-progress-bar-bg:         var(--rs-gray-200);
+  --rs-progress-bar-fill:       var(--rs-primary-500);
+  --rs-progress-circle-bg:      var(--rs-gray-200);
+  --rs-progress-circle-fill:    var(--rs-primary-500);
+
+  /* ---- Message / Notification ---- */
+  --rs-message-success-bg: var(--rs-bg-success);
+  --rs-message-info-bg:    var(--rs-bg-info);
+  --rs-message-warning-bg: var(--rs-bg-warning);
+  --rs-message-error-bg:   var(--rs-bg-error);
+  --rs-message-title-color: var(--rs-gray-900);
+  --rs-message-text-color:  var(--rs-gray-600);
+
+  /* ---- Tooltip ---- */
+  --rs-tooltip-bg:             var(--rs-gray-800);
+  --rs-tooltip-text:           var(--rs-gray-0);
+  --rs-tooltip-border:         var(--rs-gray-800);
+  --rs-tooltip-border-radius:  var(--rs-radius-sm);
+  --rs-tooltip-opacity:        1;
+  --rs-scrollbar-thumb-bg:  var(--rs-gray-300);
+  --rs-violet-200: #c7b9da;  --rs-violet-300: #af9bca;
+  --rs-violet-400: #957cb8;  --rs-violet-500: #7b6d9a;
+/* ---- Modal ---- */
+  --rs-modal-bg:         var(--rs-gray-0);
+  --rs-modal-border:     var(--rs-gray-200);
+  --rs-modal-shadow:     var(--rs-shadow-xl);
+  --rs-modal-radius:     var(--rs-radius-lg);
+
+  /* ---- Drawer ---- */
+  --rs-drawer-bg:     var(--rs-gray-0);
+  --rs-drawer-shadow: var(--rs-shadow-xl);
+  --rs-drawer-radius: var(--rs-radius-lg);
+
+  /* ---- Nav / Navbar / Sidenav ---- */
+  --rs-nav-item-hover-bg:    var(--rs-gray-50);
+  --rs-nav-item-active-bg:   var(--rs-primary-500);
+  --rs-nav-item-active-text: #fff;
+
+  --rs-navbar-default-bg:       var(--rs-gray-0);
+  --rs-navbar-default-border:   var(--rs-gray-200);
+  --rs-navbar-item-active-bg:   var(--rs-primary-500);
+  --rs-navbar-item-active-text: #fff;
+
+  --rs-sidenav-default-bg:     var(--rs-gray-50);
+  --rs-sidenav-default-border: var(--rs-gray-200);
+  --rs-sidenav-item-active-bg: var(--rs-primary-500);
+  --rs-sidenav-item-active-text: #fff;
+
+  /* ---- Dropdown / Menu ---- */
+  --rs-dropdown-menu-bg:      var(--rs-gray-0);
+  --rs-dropdown-menu-border:  var(--rs-gray-200);
+  --rs-dropdown-item-hover-bg: var(--rs-primary-50);
+  --rs-dropdown-item-active-bg: var(--rs-primary-500);
+  --rs-dropdown-item-active-text: #fff;
+  --rs-dropdown-divider:      var(--rs-gray-200);
+  --rs-dropdown-shadow:       var(--rs-shadow-md);
+
+  /* ---- Pagination ---- */
+  --rs-pagination-active-bg:   var(--rs-primary-500);
+  --rs-pagination-active-text: #fff;
+  --rs-pagination-hover-bg:    var(--rs-primary-50);
+
+  /* ---- Breadcrumb ---- */
+  --rs-breadcrumb-item-active-text: var(--rs-gray-900);
+
+  /* ---- Steps ---- */
+  --rs-steps-icon-active-bg:    var(--rs-primary-500);
+  --rs-steps-icon-active-color: #fff;
+
+  /* ---- Panel ---- */
+  --rs-panel-bg:            var(--rs-gray-0);
+  --rs-panel-border:        var(--rs-gray-200);
+  --rs-panel-border-radius: var(--rs-radius-lg);
+
+  /* ---- Tag ---- */
+  --rs-tag-bg:   var(--rs-gray-50);
+  --rs-tag-text: var(--rs-gray-700);
+
+  /* ---- Card ---- */
+  --rs-card-bg:     var(--rs-gray-0);
+  --rs-card-shadow: var(--rs-shadow-md);
+
+  /* ---- List ---- */
+  --rs-list-bg:                var(--rs-gray-0);
+  --rs-list-border:            var(--rs-gray-200);
+  --rs-list-hover-bg:          var(--rs-primary-50);
+  --rs-list-placeholder-bg:    rgb(from var(--rs-primary-50) r g b / 50%);
+  --rs-list-placeholder-border: var(--rs-primary-500);
+
+  /* ---- Table ---- */
+  --rs-table-border-color:    var(--rs-border-secondary);
+  --rs-table-shadow:          rgba(58, 53, 48, 0.08);
+  --rs-table-sort:            var(--rs-primary-500);
+  --rs-table-resize:          var(--rs-primary-500);
+
+  /* ---- Form ---- */
+  --rs-form-errormessage-text:   var(--rs-color-red);
+  --rs-form-errormessage-bg:     #fff;
+  --rs-form-errormessage-border: var(--rs-gray-200);
+
+  /* ---- Picker ---- */
+  --rs-picker-value:         var(--rs-primary-700);
+  --rs-picker-count-bg:      var(--rs-primary-500);
+  --rs-picker-count-text:    #fff;
+
+  /* ---- Calendar ---- */
+  --rs-calendar-today-bg:    var(--rs-primary-500);
+  --rs-calendar-today-text:  #fff;
+  --rs-calendar-range-bg:    rgb(from var(--rs-primary-100) r g b / 50%);
+  --rs-calendar-date-selected-text: #fff;
+  --rs-calendar-cell-selected-hover-bg: var(--rs-primary-700);
+
+  /* ---- Slider ---- */
+  --rs-slider-bar-bg:        var(--rs-gray-200);
+  --rs-slider-thumb-bg:      #fff;
+  --rs-slider-thumb-border:  var(--rs-primary-500);
+  --rs-slider-progress:      var(--rs-primary-500);
+
+  /* ---- Toggle ---- */
+  --rs-toggle-bg:               var(--rs-gray-500);
+  --rs-toggle-thumb:            #fff;
+  --rs-toggle-hover-bg:         var(--rs-gray-500);
+  --rs-toggle-disabled-bg:      var(--rs-gray-200);
+  --rs-toggle-checked-bg:       var(--rs-primary-500);
+  --rs-toggle-checked-thumb:    #fff;
+  --rs-toggle-checked-hover-bg: var(--rs-primary-600);
+  --rs-toggle-checked-disabled-bg: var(--rs-primary-200);
+
+  /* ---- Checkbox / Radio ---- */
+  --rs-checkbox-checked-bg:       var(--rs-primary-500);
+  --rs-checkbox-checked-border:   var(--rs-primary-500);
+  --rs-radio-checked-bg:          var(--rs-primary-500);
+  --rs-radio-checked-border:      var(--rs-primary-500);
+
+  /* ---- Uploader ---- */
+  --rs-uploader-item-bg:          var(--rs-gray-300);
+  --rs-uploader-item-hover-bg:    var(--rs-gray-50);
+  --rs-uploader-overlay-bg:       rgb(from #fff r g b / 80%);
+  --rs-uploader-dnd-bg:           var(--rs-gray-0);
+  --rs-uploader-dnd-border:       var(--rs-gray-200);
+  --rs-uploader-dnd-hover-border: var(--rs-primary-500);
+
+  /* ---- Avatar ---- */
+  --rs-avatar-bg:   var(--rs-gray-300);
+  --rs-avatar-text: var(--rs-gray-0);
+
+  /* ---- Badge ---- */
+  --rs-badge-bg:     var(--rs-color-red);
+  --rs-badge-text:   var(--rs-gray-0);
+  --rs-badge-border: var(--rs-gray-0);
+
+  /* ---- Carousel ---- */
+  --rs-carousel-bg:                  var(--rs-gray-600);
+  --rs-carousel-indicator-active:    var(--rs-primary-500);
+
+  /* ---- Timeline ---- */
+  --rs-timeline-indicator-bg:        var(--rs-gray-300);
+  --rs-timeline-indicator-active-bg: var(--rs-primary-500);
+
+  /* ---- Popover ---- */
+  --rs-popover-shadow: 0 1px 8px rgba(0, 0, 0, 0.12);
+
+  /* ---- Tree ---- */
+  --rs-tree-indent-line-color: rgba(0, 0, 0, 0.1);
+
+  /* ---- Stat ---- */
+  --rs-stat-body-bg: var(--rs-gray-0);
+
+  /* ---- Rate ---- */
+  --rs-rate-symbol-color:  var(--rs-gray-300);
+  --rs-rate-symbol-active: var(--rs-color-yellow);
+}
