@@ -5,7 +5,7 @@ export const createMedicationSchema = yup.object({
   name: yup.string().trim().max(200).required('Enter a medication name.'),
   strength: yup.string().trim().max(200).default(''),
   dose: yup.string().trim().max(200).required('Enter the usual dose.'),
-  schedule: yup.array().of(time()).max(24).default([]).test('unique', 'Schedule times must be unique.', v => !v || new Set(v).size === v.length),
+  schedule: yup.array().transform(value => Array.isArray(value) ? [...value].sort() : value).of(time()).max(24).default([]).test('unique', 'Schedule times must be unique.', v => !v || new Set(v).size === v.length),
   notes: yup.string().trim().max(5000).default(''),
 });
 export const createDoseSchema = yup.object({

@@ -6,9 +6,10 @@ import { Button, Input, Modal, SelectPicker } from 'rsuite';
 import { FormError } from '../ui/FormError';
 import { createDoseSchema } from '../../lib/validations/medications';
 import type { Medicine } from '../../types';
-import { localDateTime } from '../ui/format';
+import { localDateTime, timeLabel } from '../ui/format';
 
 export function DoseLogModal({ medicine, scheduledTime, onClose }: { medicine: Medicine; scheduledTime?: string; onClose: () => void }) {
+  const [selectedTime, setSelectedTime] = useState(scheduledTime ?? (medicine.schedule.length === 1 ? medicine.schedule[0] : ''));
   const [status, setStatus] = useState<'Taken' | 'Skipped'>('Taken');
 
   const [error, setError] = useState<string | null>(null);
@@ -30,9 +31,10 @@ export function DoseLogModal({ medicine, scheduledTime, onClose }: { medicine: M
     setError(null);
     try {
 
+      if (medicine.schedule.length && !selectedTime) throw new Error('Choose the scheduled time for this dose.');
       const when = String(fields.get('when') || '');
       const data = await createDoseSchema.validate({
-        medicineId: medicine.id, status, scheduledTime,
+        medicineId: medicine.id, status, scheduledTime: selectedTime || undefined,
         dose: fields.get('dose'), notes: fields.get('notes'),
         takenAt: when ? new Date(when).toISOString() : '',
       }, { stripUnknown: true });
@@ -51,6 +53,12 @@ export function DoseLogModal({ medicine, scheduledTime, onClose }: { medicine: M
 
         <label id="dose-status-label">Status</label>
         <SelectPicker aria-labelledby="dose-status-label" value={status} onChange={v => setStatus(v as 'Taken' | 'Skipped')} cleanable={false} searchable={false} disabled={submitting} data={['Taken', 'Skipped'].map(value => ({ value, label: value }))}/>
+        {medicine.schedule.length > 0 && <label>Scheduled time
+          <select required value={selectedTime} disabled={submitting || !!scheduledTime} onChange={event => setSelectedTime(event.target.value)}>
+            <option value="" disabled>Choose a scheduled time</option>
+            {[...medicine.schedule].sort().map(time => <option key={time} value={time}>{timeLabel(time)}</option>)}
+          </select>
+        </label>}
         <label>Dose<Input name="dose" required maxLength={200} defaultValue={medicine.dose}/></label>
         <label>Date and time<Input name="when" type="datetime-local" required defaultValue={localDateTime()} max={localDateTime()}/></label>
 
