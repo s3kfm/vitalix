@@ -37,3 +37,7 @@ Some overview content is static demo data, and context actions such as report up
 ## Database types
 
 `src/db/types.ts` exports Drizzle `$inferSelect` and `$inferInsert` types. `Serialized<T>` maps database dates to JSON strings while retaining nullable fields. Shared measurement API types add the joined definition, group source, and component values. UI projections in `src/types.ts` select database fields where applicable; demo-only models stay separate.
+
+## Assistant
+
+Set server-only `ANTHROPIC_API_KEY` to enable the Assistant chat. `ANTHROPIC_MODEL` defaults to `claude-sonnet-5`. The chat accepts text, images, PDFs, and TXT files and proposes mixed batches of health records for confirmation before saving through the existing APIs. Chat and attachments remain in memory and clear on refresh. See [assistant behavior and setup](docs/assistant.md).

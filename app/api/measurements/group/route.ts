@@ -5,6 +5,7 @@ import { measurementGroups, measurements, measurementValues, measurementDefiniti
 import { findOrCreatePatient } from '@/src/db/patient';
 import { createMeasurementGroupSchema } from '@/src/lib/validations/measurements';
 import { seedDefinitions } from '@/src/db/seed';
+import { validateExtractedMeasurement } from '@/src/lib/assistant/validate-measurement';
 import type { MeasurementResult } from '@/src/lib/measurements/result';
 
 /**
@@ -44,6 +45,15 @@ export async function POST(request: NextRequest) {
       slugToDef.set(obs.definitionSlug, def);
     }
 
+    if (data.source === 'ai') {
+      for (const observation of data.observations) {
+        const error = validateExtractedMeasurement(observation, slugToDef.get(observation.definitionSlug)!.components);
+        if (error) return NextResponse.json({ error }, { status: 400 });
+      }
+      // Chat and attachments are transient, including when an API caller supplies them.
+      delete data.messages;
+    }
+
     // Create the group
     const [group] = await db
       .insert(measurementGroups)
@@ -62,7 +72,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create measurement group' }, { status: 500 });
     }
 
-    // Create each measurement + its values inside a transaction
+    // Create each measurement and its values sequentially.
     const created: Array<{ measurement: typeof measurements.$inferSelect; values: typeof measurementValues.$inferSelect[] }> = [];
 
     for (const obs of data.observations) {
