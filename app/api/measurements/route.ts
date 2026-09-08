@@ -32,9 +32,9 @@ export async function GET(request: NextRequest) {
     const conditions = [eq(measurements.patientId, patient.id)];
 
     if (query.definitionSlug) {
-      const defs = await db
+      const defs = await db 
         .select({ id: measurementDefinitions.id })
-        .from(measurementDefinitions)
+        .from(measurementDefinitions) 
         .where(eq(measurementDefinitions.slug, query.definitionSlug))
         .limit(1);
 

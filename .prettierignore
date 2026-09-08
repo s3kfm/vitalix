@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+.next
+.next-turbo
+.cache
+.pnpm-store
+
+# Build
+dist
+build
+storybook-static
+
+# Env
+.env
+.env.*
+*.local
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+*.tsbuildinfo
+next-env.d.ts
