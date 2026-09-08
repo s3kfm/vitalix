@@ -2,69 +2,99 @@ import type { CodeableConcept, ObservationReferenceRange } from 'fhir/r4';
 import type { ComponentDefinition } from '../lib/measurements/catalog';
 import type { MeasurementResult } from '../lib/measurements/result';
 import { sql } from 'drizzle-orm';
-import { check, index, jsonb, numeric, pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { check, index, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 
 export const measurementStatus = pgEnum('measurement_status', ['final', 'amended', 'entered-in-error']);
-export const measurementSource = pgEnum('measurement_source', ['patient_reported', 'report', 'device']);
-export const captureMethod = pgEnum('measurement_capture_method', ['manual_form', 'ai_extraction', 'ai_conversation', 'device_import']);
-export const verificationStatus = pgEnum('measurement_verification_status', ['pending_review', 'user_confirmed']);
+export const groupSource = pgEnum('group_source', ['manual', 'ai']);
 
+// ---------------------------------------------------------------------------
 // Authentication accounts and clinical patient identities are separate.
+// ---------------------------------------------------------------------------
 export const patients = pgTable('patients', {
-  id: uuid().defaultRandom().primaryKey(),
-  authUserId: text().notNull().unique(),
-  createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+  id: uuid("id").defaultRandom().primaryKey(),
+  authUserId: text("auth_user_id").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// ---------------------------------------------------------------------------
+// Immutable measurement type catalogue (e.g. "blood-pressure", "weight").
+// ---------------------------------------------------------------------------
 export const measurementDefinitions = pgTable('measurement_definitions', {
-  id: uuid().defaultRandom().primaryKey(),
-  slug: text().notNull().unique(),
-  name: text().notNull(),
-  loincCode: text(),
-  category: text().notNull(),
-  description: text(),
-  // Treat definitions as immutable once referenced by a measurement.
-  components: jsonb().$type<ComponentDefinition[]>().notNull(),
+  id: uuid("id").defaultRandom().primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  loincCode: text("loinc_code"),
+  category: text("category").notNull(),
+  description: text("description"),
+  components: jsonb("components").$type<ComponentDefinition[]>().notNull(),
 });
 
+// ---------------------------------------------------------------------------
+// A MeasurementGroup bundles 1+ observations submitted together.
+// Every measurement belongs to exactly one group.
+// ---------------------------------------------------------------------------
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp?: string;
+}
+
+export const measurementGroups = pgTable('measurement_groups', {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").references(() => patients.id).notNull(),
+  source: groupSource("source").default('manual').notNull(),
+  status: measurementStatus("status").default('final').notNull(),
+  observedAt: timestamp("observed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  notes: text("notes"),
+  // AI-related fields
+  sourceMessageId: text("source_message_id"),
+  messages: jsonb("messages").$type<ChatMessage[]>(),
+  observationCount: integer("observation_count").default(0).notNull(),
+}, t => [
+  index('measurement_groups_patient_time_idx').on(t.patientId, t.createdAt),
+]);
+
+// ---------------------------------------------------------------------------
+// A single observation (FHIR-aligned).
+// source / capture metadata lives on the group, not here.
+// ---------------------------------------------------------------------------
 export const measurements = pgTable('measurements', {
-  id: uuid().defaultRandom().primaryKey(),
-  patientId: uuid().references(() => patients.id).notNull(),
-  definitionId: uuid().references(() => measurementDefinitions.id).notNull(),
-  observedAt: timestamp({ withTimezone: true }).notNull(),
-  createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
-  status: measurementStatus().default('final').notNull(),
-  sourceType: measurementSource().notNull(),
-  captureMethod: captureMethod().notNull(),
-  // Legacy external source identifiers. Canonical evidence is linked through measurement revisions.
-  sourceReportId: text(),
-  sourceMessageId: text(),
-  verificationStatus: verificationStatus().notNull(),
-  confirmedAt: timestamp({ withTimezone: true }),
-  method: text(),
-  bodySite: text(),
-  notes: text(),
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").references(() => patients.id).notNull(),
+  groupId: uuid("group_id").references(() => measurementGroups.id, { onDelete: 'cascade' }).notNull(),
+  definitionId: uuid("definition_id").references(() => measurementDefinitions.id).notNull(),
+  observedAt: timestamp("observed_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  status: measurementStatus("status").default('final').notNull(),
+  verifiedAt: timestamp("verified_at", { withTimezone: true }),
+  method: text("method"),
+  bodySite: text("body_site"),
+  notes: text("notes"),
 }, t => [
   unique('measurement_patient_unique').on(t.id, t.patientId),
   index('measurements_patient_time_idx').on(t.patientId, t.observedAt),
-  check('measurement_source_consistency', sql`(${t.sourceType} = 'patient_reported' AND ${t.captureMethod} IN ('manual_form', 'ai_conversation')) OR (${t.sourceType} = 'report' AND ${t.captureMethod} = 'ai_extraction' AND ${t.sourceReportId} IS NOT NULL) OR (${t.sourceType} = 'device' AND ${t.captureMethod} = 'device_import')`),
-  check('measurement_chat_source', sql`${t.captureMethod} <> 'ai_conversation' OR ${t.sourceMessageId} IS NOT NULL`),
+  index('measurements_group_idx').on(t.groupId),
 ]);
 
+// ---------------------------------------------------------------------------
+// Component values inside a measurement (e.g. systolic / diastolic).
+// Discriminated result supports every FHIR R4 Observation.value[x].
+// ---------------------------------------------------------------------------
 export const measurementValues = pgTable('measurement_values', {
-  id: uuid().defaultRandom().primaryKey(),
-  measurementId: uuid().references(() => measurements.id, { onDelete: 'cascade' }).notNull(),
-  componentKey: text().notNull(),
-  loincCode: text(),
-  // Discriminated result supports every R4 Observation.value[x] without coercion.
-  result: jsonb().$type<MeasurementResult>().notNull(),
-  originalText: text(),
-  interpretation: jsonb().$type<CodeableConcept[]>(),
-  referenceRanges: jsonb().$type<ObservationReferenceRange[]>(),
-  normalizedValue: numeric(),
-  normalizedUnit: text(),
-  conversionVersion: text(),
+  id: uuid("id").defaultRandom().primaryKey(),
+  measurementId: uuid("measurement_id").references(() => measurements.id, { onDelete: 'cascade' }).notNull(),
+  componentKey: text("component_key").notNull(),
+  loincCode: text("loinc_code"),
+  result: jsonb("result").$type<MeasurementResult>().notNull(),
+  originalText: text("original_text"),
+  interpretation: jsonb("interpretation").$type<CodeableConcept[]>(),
+  referenceRanges: jsonb("reference_ranges").$type<ObservationReferenceRange[]>(),
+  normalizedValue: numeric("normalized_value"),
+  normalizedUnit: text("normalized_unit"),
+  conversionVersion: text("conversion_version"),
 }, t => [
   unique('measurement_component_unique').on(t.measurementId, t.componentKey),
   check('measurement_result_shape', sql`COALESCE(
@@ -87,8 +117,3 @@ export const measurementValues = pgTable('measurement_values', {
       ELSE false END, false)`),
   check('measurement_normalization_complete', sql`(${t.normalizedValue} IS NULL AND ${t.normalizedUnit} IS NULL AND ${t.conversionVersion} IS NULL) OR (${t.result}->>'type' = 'quantity' AND ${t.normalizedValue} IS NOT NULL AND ${t.normalizedUnit} IS NOT NULL AND ${t.conversionVersion} IS NOT NULL)`),
 ]);
-
-export const measurementPins = pgTable('measurement_pins', {
-  patientId: uuid().references(() => patients.id).notNull(),
-  definitionId: uuid().references(() => measurementDefinitions.id).notNull(),
-}, t => [unique('measurement_pin_unique').on(t.patientId, t.definitionId)]);
