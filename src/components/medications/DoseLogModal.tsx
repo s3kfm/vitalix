@@ -18,6 +18,7 @@ export function DoseLogModal({ medicine, scheduledTime, onClose }: { medicine: M
     mutationFn: (data: import("../../lib/validations/medications").CreateDoseInput) => axios.post('/api/doses', data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['doses'] });
+      await queryClient.invalidateQueries({ queryKey: ['timeline'] });
       onClose();
     },
   });

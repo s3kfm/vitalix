@@ -16,6 +16,7 @@ export function AddMedicineModal({ onClose }: { onClose: () => void }) {
     mutationFn: (data: import("../../lib/validations/medications").CreateMedicationInput) => axios.post('/api/medications', data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['medications'] });
+      await queryClient.invalidateQueries({ queryKey: ['timeline'] });
       onClose();
     },
   });

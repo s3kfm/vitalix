@@ -14,6 +14,7 @@ export function SymptomLogModal({ onClose }: { onClose: () => void }) {
     mutationFn: (data: CreateSymptomInput) => axios.post('/api/symptoms', data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['symptoms'] });
+      void queryClient.invalidateQueries({ queryKey: ['timeline'] });
       toast.success('Symptom logged.');
       onClose();
     },

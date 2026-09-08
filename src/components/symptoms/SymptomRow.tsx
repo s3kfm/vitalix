@@ -11,7 +11,7 @@ export function SymptomRow({ symptom }: { symptom: SymptomRecord }) {
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: () => axios.patch(`/api/symptoms/${symptom.id}`),
-    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['symptoms'] }); },
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['symptoms'] }); void queryClient.invalidateQueries({ queryKey: ['timeline'] }); },
   });
   return <article className="symptom-row">
     <span className="icon-tile peach"><HeartPulse size={20}/></span>

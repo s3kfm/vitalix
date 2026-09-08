@@ -34,6 +34,7 @@ export function MeasurementForm({ onSuccess, onCancel, onPendingChange }: { onSu
     onSuccess: () => {
       toast.success('Measurement added.', { id: toastId.current });
       void queryClient.invalidateQueries({ queryKey: ['measurements'] });
+      void queryClient.invalidateQueries({ queryKey: ['timeline'] });
       onSuccess?.();
     },
   });

@@ -13,6 +13,7 @@ interface NavigationItem {
 
 const navigation: readonly NavigationItem[] = [
   { href: '/', label: 'Overview' },
+  { href: '/timeline', label: 'Timeline' },
   { href: '/vitals-and-labs', label: 'Measurements & Labs' },
   { href: '/symptoms', label: 'Symptoms' },
   { href: '/medications', label: 'Medications' },
