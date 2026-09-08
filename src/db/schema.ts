@@ -6,3 +6,6 @@ export const usersTable = pgTable("users", {
   age: integer().notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
 });
+export * from './measurements';
+
+export * from './measurementProvenance';
