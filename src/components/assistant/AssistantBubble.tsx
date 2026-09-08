@@ -4,7 +4,6 @@ import { useState, type FormEventHandler, type ChangeEventHandler } from 'react'
 import { MessageCircle, Sparkles, Paperclip, ArrowUp, X } from 'lucide-react';
 import { Modal } from '../Modals';
 import { FormError } from '../ui/FormError';
-import { validateReportFile } from '../../lib/recordValidation';
 
 interface PreviewMessage {
   id: string;
@@ -27,13 +26,7 @@ export function AssistantBubble() {
   const attach: ChangeEventHandler<HTMLInputElement> = (event) => {
     const selected = event.currentTarget.files?.[0];
     if (!selected) return;
-    setError(null);
-    try {
-      validateReportFile(selected);
-      setFile(selected);
-    } catch (cause: unknown) {
-      setError(cause instanceof Error ? cause.message : 'Please choose another file.');
-    }
+    setFile(selected);
     event.currentTarget.value = '';
   };
 

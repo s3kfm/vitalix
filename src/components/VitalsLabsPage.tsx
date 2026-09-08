@@ -9,8 +9,15 @@ import { MeasurementTable } from './records/MeasurementTable';
 import { MeasurementModal } from './records/MeasurementModal';
 import { UploadReportModal } from './records/UploadReportModal';
 import { useHealthRecords } from '../context/HealthRecordsContext';
+import type { Report } from '../types';
 const viewOptions = ['Measurements', 'Lab results', 'Reports'] as const;
 type View = (typeof viewOptions)[number];
+
+function downloadReport(report: Report) {
+  // Demo: report download not implemented
+  void report;
+}
+
 export function VitalsLabsPage() {
   const { labs, reports } = useHealthRecords();
   const [tab, setTab] = useState<View>('Measurements');
