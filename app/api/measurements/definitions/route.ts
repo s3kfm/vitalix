@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/src/db';
 import { measurementDefinitions } from '@/src/db/measurements';
-import { seedDefinitions, catalog } from '@/src/db/seed';
+import { seedDefinitions } from '@/src/db/seed';
 
 /**
  * GET /api/measurements/definitions

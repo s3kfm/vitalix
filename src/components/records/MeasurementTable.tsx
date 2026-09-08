@@ -3,67 +3,11 @@ import { useState } from 'react';
 import { Pin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useHealthRecords } from '../../context/HealthRecordsContext';
+import type { MeasurementDefinition as Definition, ApiMeasurement } from '../../db/types';
+import { displayMeasurement as displayValue } from '../../lib/measurements/display';
 import { formatDate } from '../ui/format';
 import { Modal } from 'rsuite';
 import { EmptyState } from '../ui/EmptyState';
-import type { ComponentDefinition } from '../../lib/measurements/catalog';
-
-interface Definition {
-  slug: string;
-  name: string;
-  components: ComponentDefinition[];
-}
-
-interface MeasurementValue {
-  id: string;
-  componentKey: string;
-  result: { type: string; value: unknown };
-  normalizedValue?: string;
-  normalizedUnit?: string;
-}
-
-interface ApiMeasurement {
-  id: string;
-  definitionName: string | null;
-  definitionSlug: string | null;
-  groupSource: string | null;
-  observedAt: string;
-  notes: string | null;
-  values: MeasurementValue[];
-}
-
-/** Derive a displayable value+unit from a measurement's values array */
-function displayValue(m: ApiMeasurement): { value: string; unit: string } {
-  const vals = m.values ?? [];
-  if (!vals.length) return { value: '—', unit: '' };
-
-  if (vals.length === 1) {
-    const v = vals[0]!;
-    if (v.normalizedValue != null) {
-      return { value: v.normalizedValue, unit: v.normalizedUnit ?? '' };
-    }
-    const r = v.result;
-    if (r.type === 'quantity' && typeof r.value === 'object' && r.value !== null) {
-      const q = r.value as { value: number; unit: string };
-      return { value: String(q.value), unit: q.unit };
-    }
-    if (r.type === 'string' || r.type === 'boolean' || r.type === 'integer') {
-      return { value: String(r.value), unit: '' };
-    }
-    return { value: '—', unit: '' };
-  }
-
-  const parts = vals.map(v => {
-    if (v.normalizedValue != null) return v.normalizedValue;
-    const r = v.result;
-    if (r.type === 'quantity' && typeof r.value === 'object' && r.value !== null) {
-      return String((r.value as { value: number }).value);
-    }
-    return String(r.value ?? '—');
-  });
-  const unit = vals[0]?.normalizedUnit ?? '';
-  return { value: parts.join('/'), unit };
-}
 
 export function MeasurementTable({ query }: { query: string }) {
   const { togglePin } = useHealthRecords();

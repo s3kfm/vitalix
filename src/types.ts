@@ -1,22 +1,7 @@
-export interface Medicine {
-  id: string;
-  name: string;
-  strength: string;
-  dose: string;
-  schedule: string[];
-  notes: string;
-  active: boolean;
-}
-export interface DoseLog {
-  id: string;
-  medicineId: string;
-  name: string;
-  dose: string;
-  takenAt: string;
-  status: DoseStatus;
-  scheduledTime?: string;
-  notes: string;
-}
+import type { Medication, DoseRecord } from './db/types';
+
+export type Medicine = Pick<Medication, 'id' | 'name' | 'strength' | 'dose' | 'schedule' | 'notes' | 'active'>;
+export type DoseLog = Pick<DoseRecord, 'id' | 'medicineId' | 'name' | 'dose' | 'takenAt' | 'status' | 'notes'> & Partial<Pick<DoseRecord, 'scheduledTime'>>;
 export interface Measurement {
   id: string;
   name: string;
@@ -57,7 +42,7 @@ export interface ActivityEntry {
   recordedAt: string;
 }
 
-export type DoseStatus = 'Taken' | 'Skipped';
+export type DoseStatus = DoseRecord['status'];
 export type NewMedicine = Omit<Medicine, 'id'>;
 export type NewMeasurement = Omit<Measurement, 'id'>;
 export type NewSymptomEntry = Omit<SymptomEntry, 'id'>;

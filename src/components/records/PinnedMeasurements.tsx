@@ -3,44 +3,9 @@ import Link from 'next/link';
 import { Pin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useHealthRecords } from '../../context/HealthRecordsContext';
+import type { MeasurementDefinition as Definition, ApiMeasurement } from '../../db/types';
+import { displayMeasurement as displayValue } from '../../lib/measurements/display';
 import { formatDate } from '../ui/format';
-
-interface Definition {
-  slug: string;
-  name: string;
-}
-
-interface ApiMeasurement {
-  id: string;
-  definitionName: string | null;
-  definitionSlug: string | null;
-  groupSource: string | null;
-  observedAt: string;
-  notes: string | null;
-  values: Array<{
-    componentKey: string;
-    result: { type: string; value: unknown };
-    normalizedValue?: string;
-    normalizedUnit?: string;
-  }>;
-}
-
-function displayValue(m: ApiMeasurement): { value: string; unit: string } {
-  const vals = m.values ?? [];
-  if (!vals.length) return { value: '—', unit: '' };
-  if (vals.length === 1) {
-    const v = vals[0]!;
-    if (v.normalizedValue != null) return { value: v.normalizedValue, unit: v.normalizedUnit ?? '' };
-    const r = v.result;
-    if (r.type === 'quantity' && typeof r.value === 'object' && r.value !== null) {
-      const q = r.value as { value: number; unit: string };
-      return { value: String(q.value), unit: q.unit };
-    }
-    return { value: String(r.value ?? '—'), unit: '' };
-  }
-  const parts = vals.map(v => v.normalizedValue ?? String((v.result as any)?.value?.value ?? '—'));
-  return { value: parts.join('/'), unit: vals[0]?.normalizedUnit ?? '' };
-}
 
 export function PinnedMeasurements() {
   const { togglePin } = useHealthRecords();

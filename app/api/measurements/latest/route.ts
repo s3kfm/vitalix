@@ -1,3 +1,4 @@
+import type { MeasurementWithValues } from '@/src/db/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, desc, ne } from 'drizzle-orm';
 import { db } from '@/src/db';
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
       definitionSlug: def?.slug ?? null,
       groupSource: group?.source ?? null,
       values,
-    });
+    } satisfies MeasurementWithValues);
   } catch (error) {
     console.error('GET /api/measurements/latest error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -21,10 +21,4 @@ export const symptoms = pgTable('symptoms', {
   check('symptoms_resolution_order', sql`${t.resolvedAt} IS NULL OR ${t.resolvedAt} >= ${t.onsetAt}`),
 ]);
 
-type Symptom = typeof symptoms.$inferSelect;
-export type SymptomRecord = Omit<Symptom, 'onsetAt' | 'resolvedAt' | 'createdAt' | 'updatedAt'> & {
-  onsetAt: string;
-  resolvedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+export type { SymptomRecord } from './types';

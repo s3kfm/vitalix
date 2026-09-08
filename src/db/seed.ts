@@ -1,15 +1,7 @@
-import type { ComponentDefinition } from '../lib/measurements/catalog';
 import { measurementDefinitions } from './measurements';
 import { db } from './index';
 
-export interface CatalogEntry {
-  slug: string;
-  name: string;
-  loincCode: string | null;
-  category: string;
-  description: string;
-  components: ComponentDefinition[];
-}
+export type CatalogEntry = Omit<typeof measurementDefinitions.$inferSelect, 'id'>;
 
 export const catalog: CatalogEntry[] = [
   {

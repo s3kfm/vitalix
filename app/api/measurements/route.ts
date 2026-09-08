@@ -1,3 +1,4 @@
+import type { MeasurementWithValues } from '@/src/db/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { db } from '@/src/db';
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
       .offset(query.offset!);
 
     // Attach values + definition name to each measurement
-    const result = await Promise.all(
+    const result: MeasurementWithValues[] = await Promise.all(
       rows.map(async (m) => {
         const vals = await db
           .select()

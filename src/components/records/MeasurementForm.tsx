@@ -6,13 +6,12 @@ import { toast } from 'sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFormik, type FormikErrors } from 'formik';
 import { SelectPicker } from 'rsuite';
-import type { ComponentDefinition } from '../../lib/measurements/catalog';
 import type { CreateMeasurementGroupInput } from '../../lib/validations/measurements';
 import { initialDraft, resultFields, serializeResult, type ComponentDraft } from '../../lib/measurements/form';
 import { localDateTime } from '../ui/format';
 import { FormError } from '../ui/FormError';
 
-interface Definition { slug: string; name: string; components: ComponentDefinition[] }
+type Definition = import('../../db/types').MeasurementDefinition;
 interface FormValues { definitionSlug: string; observedAt: string; notes: string; components: ComponentDraft[] }
 
 export function MeasurementForm({ onSuccess, onCancel, onPendingChange }: { onSuccess?: () => void; onCancel?: () => void; onPendingChange?: (pending: boolean) => void }) {
