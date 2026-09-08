@@ -33,7 +33,7 @@ export function ChangesetCard({ changeset, output, disabled, onResult, onEdit, o
     try {
       const next = await saveChangeset(data, results, setResults);
       // Refresh even uncertain saves: the response may have been lost after a write.
-      await Promise.all(['symptoms', 'medications', 'doses', 'measurements'].map(key => queryClient.invalidateQueries({ queryKey: [key] })));
+      await Promise.all(['symptoms', 'medications', 'doses', 'measurements', 'timeline'].map(key => queryClient.invalidateQueries({ queryKey: [key] })));
       if (next.every(result => result.status === 'saved')) onResult({ status: 'saved', records: next });
     } finally {
       guard.current = false;
