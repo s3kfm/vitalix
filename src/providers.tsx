@@ -1,7 +1,7 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createDefaultFetcher } from 'tanstack-query-fetcher';
+import { createDefaultFetcher } from 'react-query-fetcher';
 import { useState } from 'react';
 import { Toaster } from 'sonner';
 
