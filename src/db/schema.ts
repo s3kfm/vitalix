@@ -7,5 +7,3 @@ export const usersTable = pgTable("users", {
   email: varchar({ length: 255 }).notNull().unique(),
 });
 export * from './measurements';
-
-export * from './measurementProvenance';
