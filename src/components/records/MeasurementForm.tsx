@@ -20,8 +20,7 @@ export function MeasurementForm({ onSuccess, onCancel, onPendingChange }: { onSu
   const queryClient = useQueryClient();
   const toastId = useRef<string | number | undefined>(undefined);
   const definitions = useQuery({
-    queryKey: ['measurement-definitions'],
-    queryFn: async () => (await axios.get<Definition[]>('/api/measurements/definitions')).data,
+    queryKey: ["measurements", "definitions"],
   });
   const mutation = useMutation({
     mutationFn: (payload: CreateMeasurementGroupInput) => axios.post('/api/measurements/group', payload),
@@ -87,7 +86,6 @@ export function MeasurementForm({ onSuccess, onCancel, onPendingChange }: { onSu
       loading={definitions.isPending}
       disabled={form.isSubmitting}
       block
-      container={() => container.current!}
       onChange={slug => {
         const selected = definitions.data?.find(item => item.slug === slug);
         mutation.reset();
@@ -100,17 +98,28 @@ export function MeasurementForm({ onSuccess, onCancel, onPendingChange }: { onSu
     <FormError message={form.submitCount ? form.errors.definitionSlug ?? null : null} />
     {definition?.components.map((component, index) => <fieldset key={`${definition.slug}-${component.key}`} disabled={form.isSubmitting}>
       <legend>{component.name}</legend>
-      <div className="form-grid">{resultFields(component.resultType).map(field => {
+      <div className="flex gap-2">{resultFields(component.resultType).map(field => {
         const value = form.values.components[index]?.[field.key] ?? '';
         const change = (next: string) => void form.setFieldValue(`components.${index}`, { ...form.values.components[index], [field.key]: next });
-        return <label key={field.key}>{field.label}{field.optional && <span className="optional"> optional</span>}
-          {field.kind === 'comparator' || field.kind === 'boolean'
-            ? <select value={value} onChange={event => change(event.target.value)}>
-                {field.kind === 'comparator'
-                  ? <><option value="">Equal to</option>{['<', '<=', '>=', '>'].map(item => <option key={item} value={item}>{item}</option>)}</>
-                  : <><option value="">Choose a result</option><option value="true">Yes</option><option value="false">No</option></>}
+        return <label key={field.key}>{field.label}
+          {field.kind === 'comparator'
+            ? <SelectPicker
+              data={['=', '<', '<=', '>=', '>'].map(item => ({ label: item, value: item }))}
+              value={value || null}
+              cleanable
+              searchable={false}
+              disabled={form.isSubmitting}
+              block
+              onChange={val => change(val ?? '')}
+              placeholder="="
+            />
+            : field.kind === 'boolean'
+              ? <select value={value} onChange={event => change(event.target.value)}>
+                <option value="">Choose a result</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
               </select>
-            : <input type={field.kind} step={component.resultType === 'integer' ? '1' : field.kind === 'time' ? '1' : 'any'} value={value} onChange={event => change(event.target.value)} />}
+              : <input type={field.kind} step={component.resultType === 'integer' ? '1' : field.kind === 'time' ? '1' : 'any'} value={value} onChange={event => change(event.target.value)} />}
         </label>;
       })}</div>
       {!resultFields(component.resultType).length && <FormError message={`Manual entry for ${component.resultType} is not supported yet.`} />}

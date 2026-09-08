@@ -6,9 +6,9 @@ type InputKind = 'text' | 'number' | 'datetime-local' | 'time' | 'boolean' | 'co
 export interface ResultField { key: string; label: string; kind: InputKind; optional?: boolean }
 
 const quantityFields = (prefix = '', label = ''): ResultField[] => [
+  { key: `${prefix}comparator`, label: `${label}Comparator`, kind: 'comparator', optional: true },
   { key: `${prefix}value`, label: `${label}Value`, kind: 'number' },
   { key: `${prefix}unit`, label: `${label}Unit`, kind: 'text' },
-  { key: `${prefix}comparator`, label: `${label}Comparator`, kind: 'comparator', optional: true },
 ];
 
 export function resultFields(type: string): ResultField[] {
