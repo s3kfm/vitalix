@@ -24,6 +24,10 @@ export const recordSchema = z.discriminatedUnion('kind', [
     name: z.string().min(1).max(200), onsetAt: timestamp, resolvedAt: timestamp.optional(),
     severity: z.number().int().min(1).max(10).optional(), location: z.string().max(200).optional(), notes,
   }) }),
+  z.object({ key, kind: z.literal('resolveSymptom'), data: z.object({
+    symptomId: z.string().uuid().describe('Existing symptom UUID from lookup.'),
+    symptomName: z.string().min(1).max(200).describe('Human-readable name for review.'),
+  }) }),
   z.object({ key, kind: z.literal('medication'), data: z.object({
     name: z.string().min(1).max(200), strength: z.string().max(200), dose: z.string().min(1).max(200),
     schedule: z.array(time).max(24).describe('Daily local times, or [] for explicitly as-needed medication. Ask if unknown.'), notes,
@@ -58,8 +62,18 @@ export type Changeset = z.infer<typeof changesetSchema>;
 export interface SaveResult { key: string; kind: ProposedRecord['kind']; status: 'saved' | 'failed' | 'uncertain'; id?: string; error?: string }
 export interface ConfirmationResult { status: 'saved' | 'partial' | 'cancelled'; records: SaveResult[] }
 
+export async function resolveSymptom(id: string, request: typeof fetch = fetch): Promise<{ ok: boolean; error?: string }> {
+  const response = await request(`/api/symptoms/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' } });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    return { ok: false, error: (body as { error?: string }).error || 'Could not resolve symptom.' };
+  }
+  return { ok: true };
+}
+
 export function recordTitle(record: ProposedRecord): string {
   if (record.kind === 'symptom' || record.kind === 'medication') return record.data.name;
+  if (record.kind === 'resolveSymptom') return record.data.symptomName;
   if (record.kind === 'dose') return `${record.data.status} · ${record.data.dose}`;
   return record.data.definitionSlug.replaceAll('-', ' ');
 }
@@ -86,10 +100,12 @@ export function recordDetails(record: ProposedRecord, records: ProposedRecord[])
     const medication = records.find(item => item.key === record.data.medicineId && item.kind === 'medication');
     fields.push(['Medication', medication ? recordTitle(medication) : record.data.medicationName], ['When', date(record.data.takenAt)]);
     if (record.data.scheduledTime) fields.push(['Scheduled', record.data.scheduledTime]);
+  } else if (record.kind === 'resolveSymptom') {
+    fields.push(['Action', 'Mark as resolved']);
   } else {
     fields.push(['Measured', date(record.data.observedAt)]);
     for (const value of record.data.values) fields.push([value.componentKey, describeValue(value.result.value)]);
   }
-  if (record.data.notes) fields.push(['Notes', record.data.notes]);
+  if ('notes' in record.data && record.data.notes) fields.push(['Notes', record.data.notes]);
   return fields;
 }

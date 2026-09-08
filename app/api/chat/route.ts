@@ -5,6 +5,7 @@ import { createHealthAgent } from '@/src/lib/assistant/agent';
 import { attachmentTypes, maxFileBytes, maxRequestBytes } from '@/src/lib/assistant/attachments';
 import { GET as getMedications } from '../medications/route';
 import { GET as getDefinitions } from '../measurements/definitions/route';
+import { GET as getSymptoms } from '../symptoms/route';
 
 export const maxDuration = 60;
 const requestSchema = z.object({
@@ -53,9 +54,9 @@ export async function POST(request: NextRequest) {
     const agent = createHealthAgent({
       timezone: body.timezone,
       getRecordContext: async () => {
-        const [medications, definitions] = await Promise.all([getMedications(request), getDefinitions()]);
-        if (!medications.ok || !definitions.ok) return { error: 'Could not load health record context. Ask the user to try again; do not guess medication IDs or measurement definitions.' };
-        return { medications: await medications.json(), measurementDefinitions: await definitions.json() };
+        const [medications, definitions, symptomsData] = await Promise.all([getMedications(request), getDefinitions(), getSymptoms(request)]);
+        if (!medications.ok || !definitions.ok || !symptomsData.ok) return { error: 'Could not load health record context. Ask the user to try again; do not guess medication IDs, symptom IDs, or measurement definitions.' };
+        return { medications: await medications.json(), measurementDefinitions: await definitions.json(), symptoms: await symptomsData.json() };
       },
     });
     return await createAgentUIStreamResponse({

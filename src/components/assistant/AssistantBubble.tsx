@@ -130,7 +130,7 @@ export function AssistantBubble() {
               {part.mediaType.startsWith('image/') ? <Image src={part.url} alt={part.filename || 'Attached image'} width={240} height={180} unoptimized /> : <FileText size={22} />}
               <span>{part.filename || 'Attachment'}</span>
             </div>;
-            if (part.type === 'tool-getRecordContext') return <p className="assistant-tool-status" key={index}>{part.state === 'output-available' ? 'Health record context loaded' : part.state === 'output-error' ? 'Could not load health records' : 'Checking your medications and measurement types…'}</p>;
+            if (part.type === 'tool-getRecordContext') return <p className="assistant-tool-status" key={index}>{part.state === 'output-available' ? 'Health record context loaded' : part.state === 'output-error' ? 'Could not load health records' : 'Checking your medications, symptoms, and measurement types…'}</p>;
             if (part.type === 'tool-confirmRecords') {
               if (part.state === 'input-streaming') return <p className="assistant-tool-status" key={part.toolCallId}><LoaderCircle className="assistant-spin" size={14} />Preparing records for review…</p>;
               if (part.state === 'input-available' || part.state === 'output-available') return <ChangesetCard

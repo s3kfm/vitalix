@@ -1,4 +1,4 @@
-import { changesetSchema, type Changeset, type SaveResult } from './changeset';
+import { changesetSchema, resolveSymptom, type Changeset, type SaveResult } from './changeset';
 import { createSymptomSchema } from '../validations/symptoms';
 import { createMedicationSchema, createDoseSchema } from '../validations/medications';
 import { createMeasurementGroupSchema } from '../validations/measurements';
@@ -22,6 +22,12 @@ export async function saveChangeset(
     try {
       switch (record.kind) {
         case 'symptom': endpoint = '/api/symptoms'; payload = await createSymptomSchema.validate(record.data, { stripUnknown: true }); break;
+        case 'resolveSymptom': {
+          const result = await resolveSymptom(record.data.symptomId, request);
+          if (!result.ok) { results.set(record.key, { key: record.key, kind: record.kind, status: 'failed', error: result.error }); onProgress([...results.values()]); }
+          else results.set(record.key, { key: record.key, kind: record.kind, status: 'saved', id: record.data.symptomId });
+          continue;
+        }
         case 'medication': endpoint = '/api/medications'; payload = await createMedicationSchema.validate(record.data, { stripUnknown: true }); break;
         case 'dose': {
           const dependency = records.find(item => item.key === record.data.medicineId && item.kind === 'medication');
