@@ -1,23 +1,11 @@
 import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 import { db } from './index';
 import { patients } from './measurements';
 
-/**
- * Find an existing patient by authUserId, or create one if not found.
- */
-export async function findOrCreatePatient(authUserId: string): Promise<typeof patients.$inferSelect> {
-  const existing = await db
-    .select()
-    .from(patients)
-    .where(eq(patients.authUserId, authUserId))
-    .limit(1);
-
-  if (existing[0]) return existing[0];
-
-  const [created] = await db
-    .insert(patients)
-    .values({ authUserId })
-    .returning();
-
-  return created!;
+/** Reads never enroll a patient implicitly. */
+export async function getPatient(id: string) {
+  if (!z.uuid().safeParse(id).success) return null;
+  const [patient] = await db.select().from(patients).where(eq(patients.id, id)).limit(1);
+  return patient ?? null;
 }

@@ -1,4 +1,5 @@
 'use client';
+import { usePatient } from '@/src/context/PatientContext';
 import { useState, type FormEventHandler } from 'react';
 import axios from 'axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,13 +8,14 @@ import { FormError } from '../ui/FormError';
 import { createMedicationSchema } from '../../lib/validations/medications';
 
 export function AddMedicineModal({ onClose }: { onClose: () => void }) {
+  const { patientUrl } = usePatient();
   const [scheduled, setScheduled] = useState(false);
   const [times, setTimes] = useState(['08:00']);
 
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: (data: import("../../lib/validations/medications").CreateMedicationInput) => axios.post('/api/medications', data),
+    mutationFn: (data: import("../../lib/validations/medications").CreateMedicationInput) => axios.post(patientUrl('/medications'), data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['medications'] });
       await queryClient.invalidateQueries({ queryKey: ['timeline'] });

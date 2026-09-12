@@ -4,9 +4,9 @@ Apply the schema with DATABASE_URL configured using npm run db:push, or apply
 drizzle/medications.sql to an existing database with the patients table.
 No medication seed is required.
 
-GET/POST /api/medications reads/creates the patient's medication list.
-PATCH /api/medications/[id] accepts { active: boolean } for archive/restore.
-GET/POST /api/doses reads/creates dose logs. The server obtains the medication
+GET/POST /api/patients/[patientId]/medications reads/creates the patient's medication list.
+PATCH /api/patients/[patientId]/medications/[id] accepts { active: boolean } for archive/restore.
+GET/POST /api/patients/[patientId]/doses reads/creates dose logs. The server obtains the medication
 name from the patient's medication, validates the schedule association, and
 rejects doses for archived or another patient's medication.
 

@@ -4,7 +4,7 @@ import { db } from '@/src/db';
 import { symptoms } from '@/src/db/symptoms';
 import { medications, medicationDoses } from '@/src/db/medications';
 import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
-import { findOrCreatePatient } from '@/src/db/patient';
+import { getPatient } from '@/src/db/patient';
 import type { SymptomRecord, DoseRecord, ApiMeasurement, MedicationRecord } from '@/src/db/types';
 
 export type TimelineItemKind = 'symptom' | 'dose' | 'measurement' | 'medication';
@@ -19,11 +19,10 @@ export interface TimelineItem {
   payload: SymptomRecord | DoseRecord | ApiMeasurement | MedicationRecord;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
-    const patient = await findOrCreatePatient(
-      request.headers.get('x-user-id') || 'demo-user'
-    );
+    const patient = await getPatient((await params).patientId);
+    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
 
     // 1. Symptoms
     const symptomRows = await db
@@ -37,7 +36,7 @@ export async function GET(request: NextRequest) {
       kind: 'symptom' as const,
       timestamp: s.onsetAt.toISOString(),
       createdAt: s.createdAt.toISOString(),
-      title: (s.code as any)?.text ?? 'Symptom',
+      title: s.code.text ?? 'Symptom',
       detail: [
         s.severity !== null ? `${s.severity}/10 severity` : '',
         s.resolvedAt ? 'Resolved' : 'Ongoing',
@@ -91,9 +90,12 @@ export async function GET(request: NextRequest) {
 
         const displayValue = vals
           .map((v) => {
-            const r = v.result as any;
-            if (r?.type === 'quantity') return `${r.value?.value ?? ''} ${r.value?.unit ?? ''}`.trim();
-            if (r?.type === 'string') return r.value ?? '';
+            const r = v.result;
+            if (r.type === 'quantity' && r.value && typeof r.value === 'object') {
+              const value = r.value;
+              return `${'value' in value ? value.value : ''} ${'unit' in value ? value.unit : ''}`.trim();
+            }
+            if (r.type === 'string' && typeof r.value === 'string') return r.value;
             return '';
           })
           .filter(Boolean)
@@ -161,7 +163,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(allItems);
   } catch (error) {
-    console.error('GET /api/timeline:', error);
+    console.error('GET /api/patients/[patientId]/timeline:', error);
     return NextResponse.json(
       { error: 'Could not load timeline.' },
       { status: 500 }

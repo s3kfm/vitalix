@@ -3,20 +3,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
-import { findOrCreatePatient } from '@/src/db/patient';
+import { getPatient } from '@/src/db/patient';
 import { listMeasurementsSchema } from '@/src/lib/validations/measurements';
 
 /**
- * GET /api/measurements
+ * GET /api/patients/[patientId]/measurements
  * List measurements for the authenticated patient.
  * Query: ?definitionSlug= &from= &to= &limit= &offset=
  */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
-    // TODO: Replace with real auth once Clerk/session is wired.
-    const authUserId = request.headers.get('x-user-id') || 'demo-user';
 
-    const patient = await findOrCreatePatient(authUserId);
+    const patient = await getPatient((await params).patientId);
+    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
 
     const { searchParams } = request.nextUrl;
     const raw = {
@@ -90,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('GET /api/measurements error:', error);
+    console.error('GET /api/patients/[patientId]/measurements error:', error);
     if (error instanceof Error && error.name === 'ValidationError') {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }

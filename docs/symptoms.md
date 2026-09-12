@@ -5,15 +5,16 @@ exports the measurement and symptom tables for `npm run db:push` (DATABASE_URL
 must be set). No catalogue seed is needed; symptom and body-site concepts retain
 free text and can hold FHIR R4 coding objects when terminology support is added.
 
-Routes follow measurements: GET/POST `/api/symptoms`, PATCH `/api/symptoms/[id]`
+Routes follow measurements: GET/POST `/api/patients/[patientId]/symptoms`, PATCH `/api/patients/[patientId]/symptoms/[id]`
 marks an episode resolved at the current time. All operations use the existing
-patient identity convention (x-user-id, falling back to demo-user); this is demo
-identity, not session authentication. Creation validates dates, chronology,
+selected patient ID from the route. Patients are shared demo identities, without
+session authentication. Creation validates dates, chronology,
 severity (optional integer 1–10), and text lengths. Resolution is idempotent.
 
 The symptom page and overview timeline share `['symptoms']` through the existing
 default query fetcher. Creation and resolution invalidate that key. Errors stay
-local to the form, row, or query. No new provider or global handler is needed.
+local to the form, row, or query. PatientProvider supplies selection; each patient
+workspace receives a separate query cache.
 
 ## Future HL7 FHIR mapping
 

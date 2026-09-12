@@ -1,4 +1,5 @@
 'use client';
+import { usePatient } from '@/src/context/PatientContext';
 import { useState } from 'react';
 import { Pin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -10,6 +11,7 @@ import { Modal } from 'rsuite';
 import { EmptyState } from '../ui/EmptyState';
 
 export function MeasurementTable({ query }: { query: string }) {
+  const { patientUrl } = usePatient();
   const { togglePin } = useHealthRecords();
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -27,7 +29,7 @@ export function MeasurementTable({ query }: { query: string }) {
       const results = await Promise.all(
         slugs.map(async (slug) => {
           try {
-            const res = await fetch(`/api/measurements/latest?definitionSlug=${encodeURIComponent(slug)}`);
+            const res = await fetch(patientUrl(`/measurements/latest?definitionSlug=${encodeURIComponent(slug)}`));
             if (!res.ok) return null;
             return await res.json() as ApiMeasurement | null;
           } catch {

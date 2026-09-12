@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { usePatient } from '@/src/context/PatientContext';
 import Image from 'next/image';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
@@ -9,8 +10,8 @@ import type { HealthChatMessage } from '@/src/lib/assistant/agent';
 import { attachmentAccept, prepareFiles, validateFiles } from '@/src/lib/assistant/attachments';
 import { ChangesetCard } from './ChangesetCard';
 
-const transport = new DefaultChatTransport<HealthChatMessage>({
-  api: '/api/chat',
+const createTransport = (api: string) => new DefaultChatTransport<HealthChatMessage>({
+  api,
   prepareSendMessagesRequest: ({ messages }) => ({
     body: {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -33,6 +34,8 @@ function FilePreview({ file }: { file: File }) {
 }
 
 export function AssistantBubble() {
+  const { patientUrl } = usePatient();
+  const [transport] = useState(() => createTransport(patientUrl('/chat')));
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const [files, setFiles] = useState<File[]>([]);

@@ -1,4 +1,5 @@
 'use client';
+import { usePatient } from '@/src/context/PatientContext';
 import Link from 'next/link';
 import { Pin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +9,7 @@ import { displayMeasurement as displayValue } from '../../lib/measurements/displ
 import { formatDate } from '../ui/format';
 
 export function PinnedMeasurements() {
+  const { patientUrl } = usePatient();
   const { togglePin } = useHealthRecords();
 
   // Fetch all definitions
@@ -24,7 +26,7 @@ export function PinnedMeasurements() {
       return Promise.all(
         slugs.map(async (slug) => {
           try {
-            const res = await fetch(`/api/measurements/latest?definitionSlug=${encodeURIComponent(slug)}`);
+            const res = await fetch(patientUrl(`/measurements/latest?definitionSlug=${encodeURIComponent(slug)}`));
             if (!res.ok) return null;
             return await res.json() as ApiMeasurement | null;
           } catch { return null; }

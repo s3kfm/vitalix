@@ -1,4 +1,5 @@
 'use client';
+import { usePatient } from '@/src/context/PatientContext';
 import { HeartPulse } from 'lucide-react';
 import { Button } from 'rsuite';
 import axios from 'axios';
@@ -8,9 +9,10 @@ import { formatDate } from '../ui/format';
 import { FormError } from '../ui/FormError';
 
 export function SymptomRow({ symptom }: { symptom: SymptomRecord }) {
+  const { patientUrl } = usePatient();
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: () => axios.patch(`/api/symptoms/${symptom.id}`),
+    mutationFn: () => axios.patch(patientUrl(`/symptoms/${symptom.id}`)),
     onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['symptoms'] }); void queryClient.invalidateQueries({ queryKey: ['timeline'] }); },
   });
   return <article className="symptom-row">

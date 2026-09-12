@@ -6,6 +6,7 @@ import { createMeasurementGroupSchema } from '../validations/measurements';
 /** Client-side tool execution. Only the confirmation button calls this function. */
 export async function saveChangeset(
   input: Changeset,
+  patientUrl: (path: string) => string,
   previous: SaveResult[] = [],
   onProgress: (results: SaveResult[]) => void = () => {},
   request: typeof fetch = fetch,
@@ -21,24 +22,24 @@ export async function saveChangeset(
     let payload: unknown;
     try {
       switch (record.kind) {
-        case 'symptom': endpoint = '/api/symptoms'; payload = await createSymptomSchema.validate(record.data, { stripUnknown: true }); break;
+        case 'symptom': endpoint = '/symptoms'; payload = await createSymptomSchema.validate(record.data, { stripUnknown: true }); break;
         case 'resolveSymptom': {
-          const result = await resolveSymptom(record.data.symptomId, request);
+          const result = await resolveSymptom(patientUrl(`/symptoms/${record.data.symptomId}`), request);
           if (!result.ok) { results.set(record.key, { key: record.key, kind: record.kind, status: 'failed', error: result.error }); onProgress([...results.values()]); }
           else results.set(record.key, { key: record.key, kind: record.kind, status: 'saved', id: record.data.symptomId });
           continue;
         }
-        case 'medication': endpoint = '/api/medications'; payload = await createMedicationSchema.validate(record.data, { stripUnknown: true }); break;
+        case 'medication': endpoint = '/medications'; payload = await createMedicationSchema.validate(record.data, { stripUnknown: true }); break;
         case 'dose': {
           const dependency = records.find(item => item.key === record.data.medicineId && item.kind === 'medication');
           const medicineId = dependency ? results.get(dependency.key)?.id : record.data.medicineId;
           if (!medicineId) throw new Error('Save the medication first, then retry this dose.');
-          endpoint = '/api/doses';
+          endpoint = '/doses';
           payload = await createDoseSchema.validate({ ...record.data, medicineId }, { stripUnknown: true });
           break;
         }
         case 'measurement':
-          endpoint = '/api/measurements/group';
+          endpoint = '/measurements/group';
           payload = await createMeasurementGroupSchema.validate({ source: 'ai', observations: [record.data] }, { stripUnknown: true });
           break;
       }
@@ -48,7 +49,7 @@ export async function saveChangeset(
       continue;
     }
     try {
-      const response = await request(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const response = await request(patientUrl(endpoint), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const body = await response.json();
       if (!response.ok) {
         // Existing endpoints can fail after writing. Only validation failures are safe to retry.

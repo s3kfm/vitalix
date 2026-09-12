@@ -1,10 +1,12 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode, type FormEvent } from 'react';
+import { Dropdown, Modal, Button, Input } from 'rsuite';
+import { usePatient } from '@/src/context/PatientContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Activity } from 'lucide-react';
-import type { UserProfile } from '../../types';
+
 
 interface NavigationItem {
   href: string;
@@ -19,7 +21,25 @@ const navigation: readonly NavigationItem[] = [
   { href: '/medications', label: 'Medications' },
 ];
 
-export function Header({ profile, children }: { profile: UserProfile; children?: ReactNode }) {
+export function Header({ children }: { children?: ReactNode }) {
+  const { patients, patient, selectPatient, enrollPatient, loading, error: loadError } = usePatient();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function enroll(event: FormEvent) {
+    event.preventDefault();
+    if (saving || !name.trim()) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await enrollPatient(name.trim());
+      setOpen(false);
+      setName('');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not enroll patient.');
+    } finally { setSaving(false); }
+  }
   const pathname = usePathname();
 
   return (
@@ -41,13 +61,25 @@ export function Header({ profile, children }: { profile: UserProfile; children?:
             </Link>
           ))}
         </nav>
-        <div className="profile">
-          <span className="avatar" aria-hidden="true">{profile.initials}</span>
-          <div>
-            <strong>{profile.displayName}</strong>
-            <small>Personal health record</small>
-          </div>
-        </div>
+        <Dropdown title={patient?.name ?? (loading ? 'Loading patients…' : 'Select patient')} placement="bottomEnd" disabled={loading || !!loadError} aria-label="Select patient">
+          {patients.map(item => <Dropdown.Item key={item.id} active={item.id === patient?.id} onSelect={() => selectPatient(item.id)}>{item.name}</Dropdown.Item>)}
+          {!!patients.length && <Dropdown.Item divider />}
+          <Dropdown.Item onSelect={() => { setName(''); setError(null); setOpen(true); }}>Enroll patient</Dropdown.Item>
+        </Dropdown>
+        <Modal open={open} onClose={() => { if (!saving) setOpen(false); }} size="xs">
+          <Modal.Header><Modal.Title>Enroll patient</Modal.Title></Modal.Header>
+          <form onSubmit={enroll}>
+            <Modal.Body>
+              <label htmlFor="patient-name">Patient name</label>
+              <Input id="patient-name" value={name} onChange={setName} maxLength={200} autoFocus disabled={saving} />
+              {error && <p role="alert">{error}</p>}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button appearance="subtle" disabled={saving} onClick={() => setOpen(false)}>Cancel</Button>
+              <Button appearance="primary" type="submit" loading={saving} disabled={!name.trim()}>Enroll patient</Button>
+            </Modal.Footer>
+          </form>
+        </Modal>
         {children}
       </div>
     </header>

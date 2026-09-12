@@ -1,4 +1,5 @@
 'use client';
+import { usePatient } from '@/src/context/PatientContext';
 import { useState, type FormEventHandler } from 'react';
 import axios from 'axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,13 +10,14 @@ import type { Medicine } from '../../types';
 import { localDateTime, timeLabel } from '../ui/format';
 
 export function DoseLogModal({ medicine, scheduledTime, onClose }: { medicine: Medicine; scheduledTime?: string; onClose: () => void }) {
+  const { patientUrl } = usePatient();
   const [selectedTime, setSelectedTime] = useState(scheduledTime ?? (medicine.schedule.length === 1 ? medicine.schedule[0] : ''));
   const [status, setStatus] = useState<'Taken' | 'Skipped'>('Taken');
 
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: (data: import("../../lib/validations/medications").CreateDoseInput) => axios.post('/api/doses', data),
+    mutationFn: (data: import("../../lib/validations/medications").CreateDoseInput) => axios.post(patientUrl('/doses'), data),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['doses'] });
       await queryClient.invalidateQueries({ queryKey: ['timeline'] });

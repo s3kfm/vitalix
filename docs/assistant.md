@@ -17,13 +17,13 @@ Successful records are excluded from subsequent retries within the same card. De
 
 Supported uploads: JPEG, PNG, WebP, GIF, PDF, and TXT. Up to three files per message, 3 MB each, 8 MB total. Unsupported formats such as HEIC, audio, and video are rejected with an actionable message; convert these to a supported format first. Inline chat requests are capped at 24 MB and 120 messages. The model must support the selected media.
 
-Files are sent inline to `/api/chat` and Anthropic, with no upload storage or database transcript. The API accepts inline file data only, not arbitrary remote file URLs. Local previews are cleared with the conversation. Provider-side retention is governed by the Anthropic account configuration.
+Files are sent inline to `/api/patients/[patientId]/chat` and Anthropic, with no upload storage or database transcript. The API accepts inline file data only, not arbitrary remote file URLs. Local previews are cleared with the conversation. Provider-side retention is governed by the Anthropic account configuration.
 
 The chat hook and confirmation cards stay mounted in the root layout. Closing/reopening the panel and client-side navigation preserve the conversation and any in-flight save results. Refreshing or starting a new chat clears conversation state; approved health records remain in the database. Nothing uses localStorage or sessionStorage.
 
 ## Implementation
 
-- `app/api/chat/route.ts`: request validation, inline media limits, streaming agent response, and reuse of medication/catalogue GET handlers.
+- `app/api/patients/[patientId]/chat/route.ts`: request validation, inline media limits, streaming agent response, and reuse of medication/catalogue GET handlers.
 - `src/lib/assistant/agent.ts`: Anthropic model, recording instructions, context lookup, and typed confirmation tool.
 - `src/lib/assistant/changeset.ts`: schemas and readable review fields for mixed batches.
 - `src/lib/assistant/save.ts`: confirmed client-side calls to existing APIs and per-record results.

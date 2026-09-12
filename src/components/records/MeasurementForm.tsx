@@ -1,4 +1,5 @@
 'use client';
+import { usePatient } from '@/src/context/PatientContext';
 
 import { useRef } from 'react';
 import axios from 'axios';
@@ -15,6 +16,7 @@ type Definition = import('../../db/types').MeasurementDefinition;
 interface FormValues { definitionSlug: string; observedAt: string; notes: string; components: ComponentDraft[] }
 
 export function MeasurementForm({ onSuccess, onCancel, onPendingChange }: { onSuccess?: () => void; onCancel?: () => void; onPendingChange?: (pending: boolean) => void }) {
+  const { patientUrl } = usePatient();
   const container = useRef<HTMLFormElement>(null);
   const queryClient = useQueryClient();
   const toastId = useRef<string | number | undefined>(undefined);
@@ -22,7 +24,7 @@ export function MeasurementForm({ onSuccess, onCancel, onPendingChange }: { onSu
     queryKey: ["measurements", "definitions"],
   });
   const mutation = useMutation({
-    mutationFn: (payload: CreateMeasurementGroupInput) => axios.post('/api/measurements/group', payload),
+    mutationFn: (payload: CreateMeasurementGroupInput) => axios.post(patientUrl('/measurements/group'), payload),
     onMutate: () => {
       onPendingChange?.(true);
       toastId.current = toast.loading('Saving measurement…');

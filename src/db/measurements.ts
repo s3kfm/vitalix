@@ -8,11 +8,11 @@ export const measurementStatus = pgEnum('measurement_status', ['final', 'amended
 export const groupSource = pgEnum('group_source', ['manual', 'ai']);
 
 // ---------------------------------------------------------------------------
-// Authentication accounts and clinical patient identities are separate.
+// Shared demo patients, enrolled explicitly without authentication.
 // ---------------------------------------------------------------------------
 export const patients = pgTable('patients', {
   id: uuid("id").defaultRandom().primaryKey(),
-  authUserId: text("auth_user_id").notNull().unique(),
+  name: text("name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

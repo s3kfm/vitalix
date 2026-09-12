@@ -7,9 +7,8 @@ import '../src/rsuite-theme.css';
 import { CustomProvider } from 'rsuite';
 import { Header } from '@/src/components/layout/Header';
 import { AssistantBubble } from '@/src/components/assistant/AssistantBubble';
-import { Providers } from '@/src/providers';
+import { Providers, PatientWorkspace } from '@/src/providers';
 import { HealthRecordsProvider } from '@/src/context/HealthRecordsContext';
-import { demoProfile } from '@/src/data/initialData';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
@@ -28,16 +27,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <HealthRecordsProvider>
               <a className="skip-link" href="#main-content">Skip to content</a>
               <div className="app-shell">
-                <Header profile={demoProfile} />
+                <Header />
                 <div className="main-shell">
-                  <main id="main-content">{children}</main>
+                  <main id="main-content"><PatientWorkspace>{children}</PatientWorkspace></main>
                   <footer>
                     <span>Vitalix · Your personal health record</span>
                     <span>Demo workspace</span>
                   </footer>
                 </div>
               </div>
-              <AssistantBubble />
+              <PatientWorkspace quiet><AssistantBubble /></PatientWorkspace>
             </HealthRecordsProvider>
           </Providers>
         </CustomProvider>

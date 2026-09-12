@@ -1,4 +1,5 @@
 'use client';
+import { usePatient } from '@/src/context/PatientContext';
 import axios from 'axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFormik } from 'formik';
@@ -9,9 +10,10 @@ import { localDateTime } from '../ui/format';
 import { FormError } from '../ui/FormError';
 
 export function SymptomLogModal({ onClose }: { onClose: () => void }) {
+  const { patientUrl } = usePatient();
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: (data: CreateSymptomInput) => axios.post('/api/symptoms', data),
+    mutationFn: (data: CreateSymptomInput) => axios.post(patientUrl('/symptoms'), data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['symptoms'] });
       void queryClient.invalidateQueries({ queryKey: ['timeline'] });

@@ -62,8 +62,8 @@ export type Changeset = z.infer<typeof changesetSchema>;
 export interface SaveResult { key: string; kind: ProposedRecord['kind']; status: 'saved' | 'failed' | 'uncertain'; id?: string; error?: string }
 export interface ConfirmationResult { status: 'saved' | 'partial' | 'cancelled'; records: SaveResult[] }
 
-export async function resolveSymptom(id: string, request: typeof fetch = fetch): Promise<{ ok: boolean; error?: string }> {
-  const response = await request(`/api/symptoms/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' } });
+export async function resolveSymptom(url: string, request: typeof fetch = fetch): Promise<{ ok: boolean; error?: string }> {
+  const response = await request(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' } });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     return { ok: false, error: (body as { error?: string }).error || 'Could not resolve symptom.' };

@@ -2,26 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { measurementGroups, measurements, measurementValues, measurementDefinitions } from '@/src/db/measurements';
-import { findOrCreatePatient } from '@/src/db/patient';
+import { getPatient } from '@/src/db/patient';
 import { createMeasurementGroupSchema } from '@/src/lib/validations/measurements';
 import { seedDefinitions } from '@/src/db/seed';
 import { validateExtractedMeasurement } from '@/src/lib/assistant/validate-measurement';
 import type { MeasurementResult } from '@/src/lib/measurements/result';
 
 /**
- * POST /api/measurements/group
+ * POST /api/patients/[patientId]/measurements/group
  * Submit a MeasurementGroup containing 1+ observations.
  * Shared metadata (source, notes, messages) applies to all observations.
  * Each observation becomes its own measurement row inside the group.
  */
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
     // Ensure definitions are seeded
     await seedDefinitions();
-
-    // TODO: Replace with real auth once Clerk/session is wired.
-    const authUserId = request.headers.get('x-user-id') || 'demo-user';
-    const patient = await findOrCreatePatient(authUserId);
+    const patient = await getPatient((await params).patientId);
+    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
 
     const body = await request.json();
     const data = await createMeasurementGroupSchema.validate(body);
@@ -124,7 +122,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('POST /api/measurements/group error:', error);
+    console.error('POST /api/patients/[patientId]/measurements/group error:', error);
     if (error instanceof Error && error.name === 'ValidationError') {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }

@@ -2,21 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq, and } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
-import { findOrCreatePatient } from '@/src/db/patient';
+import { getPatient } from '@/src/db/patient';
 import { updateMeasurementSchema } from '@/src/lib/validations/measurements';
 import type { MeasurementResult } from '@/src/lib/measurements/result';
 
 /**
- * GET /api/measurements/[id]
+ * GET /api/patients/[patientId]/measurements/[id]
  * Fetch a single measurement with its values.
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ patientId: string; id: string }> }
 ) {
   try {
-    const authUserId = _request.headers.get('x-user-id') || 'demo-user';
-    const patient = await findOrCreatePatient(authUserId);
+    const patient = await getPatient((await params).patientId);
+    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
     const { id } = await params;
 
     const [measurement] = await db
@@ -54,22 +54,22 @@ export async function GET(
       values,
     });
   } catch (error) {
-    console.error('GET /api/measurements/[id] error:', error);
+    console.error('GET /api/patients/[patientId]/measurements/[id] error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 /**
- * PUT /api/measurements/[id]
+ * PUT /api/patients/[patientId]/measurements/[id]
  * Amend a measurement (status, notes, observedAt, or replace values).
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ patientId: string; id: string }> }
 ) {
   try {
-    const authUserId = request.headers.get('x-user-id') || 'demo-user';
-    const patient = await findOrCreatePatient(authUserId);
+    const patient = await getPatient((await params).patientId);
+    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
     const { id } = await params;
 
     const [existing] = await db
@@ -129,7 +129,7 @@ export async function PUT(
 
     return NextResponse.json({ ...updated, values });
   } catch (error) {
-    console.error('PUT /api/measurements/[id] error:', error);
+    console.error('PUT /api/patients/[patientId]/measurements/[id] error:', error);
     if (error instanceof Error && error.name === 'ValidationError') {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
@@ -138,16 +138,16 @@ export async function PUT(
 }
 
 /**
- * DELETE /api/measurements/[id]
+ * DELETE /api/patients/[patientId]/measurements/[id]
  * Soft-delete: sets status to 'entered-in-error'.
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ patientId: string; id: string }> }
 ) {
   try {
-    const authUserId = request.headers.get('x-user-id') || 'demo-user';
-    const patient = await findOrCreatePatient(authUserId);
+    const patient = await getPatient((await params).patientId);
+    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
     const { id } = await params;
 
     const [existing] = await db
@@ -167,7 +167,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('DELETE /api/measurements/[id] error:', error);
+    console.error('DELETE /api/patients/[patientId]/measurements/[id] error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

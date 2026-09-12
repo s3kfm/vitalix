@@ -3,17 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, desc, ne } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
-import { findOrCreatePatient } from '@/src/db/patient';
+import { getPatient } from '@/src/db/patient';
 
 /**
- * GET /api/measurements/latest
+ * GET /api/patients/[patientId]/measurements/latest
  * Fetch the latest (most recently observed) measurement for the patient.
  * Query: ?definitionSlug= (optional — if provided, returns the latest for that definition)
  */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
-    const authUserId = request.headers.get('x-user-id') || 'demo-user';
-    const patient = await findOrCreatePatient(authUserId);
+    const patient = await getPatient((await params).patientId);
+    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
 
     const { searchParams } = request.nextUrl;
     const definitionSlug = searchParams.get('definitionSlug') || undefined;
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
       values,
     } satisfies MeasurementWithValues);
   } catch (error) {
-    console.error('GET /api/measurements/latest error:', error);
+    console.error('GET /api/patients/[patientId]/measurements/latest error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

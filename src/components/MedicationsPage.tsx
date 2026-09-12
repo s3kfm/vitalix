@@ -1,4 +1,5 @@
 'use client';
+import { usePatient } from '@/src/context/PatientContext';
 import { useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import axios from 'axios';
@@ -18,13 +19,14 @@ import type { Medicine } from '../types';
 const viewOptions = ['Today', 'My medications', 'History'] as const;
 type View = (typeof viewOptions)[number];
 export function MedicationsPage() {
+  const { patientUrl } = usePatient();
   const medicationsQuery = useQuery<Medicine[]>({ queryKey: ['medications'] });
   const dosesQuery = useQuery<DoseLog[]>({ queryKey: ['doses'] });
   const medicines = medicationsQuery.data ?? [];
   const doses = dosesQuery.data ?? [];
   const queryClient = useQueryClient();
   const archive = useMutation({
-    mutationFn: (medicine: Medicine) => axios.patch('/api/medications/' + medicine.id, { active: !medicine.active }),
+    mutationFn: (medicine: Medicine) => axios.patch(patientUrl('/medications/' + medicine.id), { active: !medicine.active }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['medications'] }),
   });
   const [tab, setTab] = useState<View>('Today');

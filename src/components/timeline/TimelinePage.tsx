@@ -7,7 +7,7 @@ import { PageHeading } from '../ui/PageHeading';
 import { Tabs } from '../ui/Tabs';
 import { EmptyState } from '../ui/EmptyState';
 import { TimelineItem } from './TimelineItem';
-import type { TimelineItem as TimelineItemType } from '../../../app/api/timeline/route';
+import type { TimelineItem as TimelineItemType } from '../../../app/api/patients/[patientId]/timeline/route';
 
 const viewOptions = ['All', 'Symptom', 'Dose', 'Measurement', 'Medication'] as const;
 type View = (typeof viewOptions)[number];

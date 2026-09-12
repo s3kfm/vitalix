@@ -2,7 +2,7 @@
 
 import { Activity, HeartPulse, Pill, Stethoscope } from 'lucide-react';
 import { formatDate } from '../ui/format';
-import type { TimelineItem as TimelineItemType } from '../../../app/api/timeline/route';
+import type { TimelineItem as TimelineItemType } from '../../../app/api/patients/[patientId]/timeline/route';
 
 const kindMeta: Record<TimelineItemType['kind'], { icon: typeof Activity; label: string; tileClass?: string }> = {
   symptom: { icon: HeartPulse, label: 'Symptom', tileClass: 'peach' },

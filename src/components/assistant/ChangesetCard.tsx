@@ -1,5 +1,6 @@
 'use client';
 
+import { usePatient } from '@/src/context/PatientContext';
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, CircleAlert, LoaderCircle } from 'lucide-react';
@@ -14,6 +15,7 @@ export function ChangesetCard({ changeset, output, disabled, onResult, onEdit, o
   onEdit: () => void;
   onSavingChange: (saving: boolean) => void;
 }) {
+  const { patientUrl } = usePatient();
   const [results, setResults] = useState<SaveResult[]>([]);
   const [saving, setSaving] = useState(false);
   const guard = useRef(false);
@@ -31,7 +33,7 @@ export function ChangesetCard({ changeset, output, disabled, onResult, onEdit, o
     setSaving(true);
     onSavingChange(true);
     try {
-      const next = await saveChangeset(data, results, setResults);
+      const next = await saveChangeset(data, patientUrl, results, setResults);
       // Refresh even uncertain saves: the response may have been lost after a write.
       await Promise.all(['symptoms', 'medications', 'doses', 'measurements', 'timeline'].map(key => queryClient.invalidateQueries({ queryKey: [key] })));
       if (next.every(result => result.status === 'saved')) onResult({ status: 'saved', records: next });

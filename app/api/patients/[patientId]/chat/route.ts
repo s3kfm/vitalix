@@ -1,10 +1,11 @@
+import { getPatient } from '@/src/db/patient';
 import { createAgentUIStreamResponse } from 'ai';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createHealthAgent } from '@/src/lib/assistant/agent';
 import { attachmentTypes, maxFileBytes, maxRequestBytes } from '@/src/lib/assistant/attachments';
 import { GET as getMedications } from '../medications/route';
-import { GET as getDefinitions } from '../measurements/definitions/route';
+import { GET as getDefinitions } from '@/app/api/measurements/definitions/route';
 import { GET as getSymptoms } from '../symptoms/route';
 
 export const maxDuration = 60;
@@ -18,9 +19,11 @@ const requestSchema = z.object({
   }, 'Invalid timezone.'),
 });
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   if (!process.env.ANTHROPIC_API_KEY) return new Response('The assistant needs an Anthropic API key. Add ANTHROPIC_API_KEY to the server environment.', { status: 503 });
   try {
+    const patient = await getPatient((await params).patientId);
+    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
     // Bound inline attachments before parsing, including chunked requests.
     const reader = request.body?.getReader();
     if (!reader) return new Response('A message is required.', { status: 400 });
@@ -54,7 +57,7 @@ export async function POST(request: NextRequest) {
     const agent = createHealthAgent({
       timezone: body.timezone,
       getRecordContext: async () => {
-        const [medications, definitions, symptomsData] = await Promise.all([getMedications(request), getDefinitions(), getSymptoms(request)]);
+        const [medications, definitions, symptomsData] = await Promise.all([getMedications(request, { params }), getDefinitions(), getSymptoms(request, { params })]);
         if (!medications.ok || !definitions.ok || !symptomsData.ok) return { error: 'Could not load health record context. Ask the user to try again; do not guess medication IDs, symptom IDs, or measurement definitions.' };
         return { medications: await medications.json(), measurementDefinitions: await definitions.json(), symptoms: await symptomsData.json() };
       },
