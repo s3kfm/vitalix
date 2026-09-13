@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 export interface Patient { id: string; name: string }
 interface PatientContextValue {
+  enrollmentOpen: boolean;
+  setEnrollmentOpen: (open: boolean) => void;
   patients: Patient[];
   patient: Patient | null;
   loading: boolean;
@@ -16,6 +18,7 @@ interface PatientContextValue {
 const Context = createContext<PatientContextValue | null>(null);
 
 export function PatientProvider({ children }: { children: ReactNode }) {
+  const [enrollmentOpen, setEnrollmentOpen] = useState(false);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [patientId, setPatientId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,7 +56,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     setPatients(current => [...current, created]);
     setPatientId(created.id);
   }
-  return <Context.Provider value={{ patients, patient, loading, error,
+  return <Context.Provider value={{ patients, patient, loading, error, enrollmentOpen, setEnrollmentOpen,
     selectPatient: setPatientId, enrollPatient, reload: () => setRevision(n => n + 1),
     patientUrl: path => {
       if (!patient) throw new Error('Select a patient first.');

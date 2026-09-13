@@ -22,8 +22,7 @@ const navigation: readonly NavigationItem[] = [
 ];
 
 export function Header({ children }: { children?: ReactNode }) {
-  const { patients, patient, selectPatient, enrollPatient, loading, error: loadError } = usePatient();
-  const [open, setOpen] = useState(false);
+  const { patients, patient, selectPatient, enrollPatient, loading, error: loadError, enrollmentOpen: open, setEnrollmentOpen: setOpen } = usePatient();
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,11 +60,11 @@ export function Header({ children }: { children?: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <Dropdown title={patient?.name ?? (loading ? 'Loading patients…' : 'Select patient')} placement="bottomEnd" disabled={loading || !!loadError} aria-label="Select patient">
+        {!loading && !loadError && !patients.length ? <Button appearance="primary" onClick={() => setOpen(true)}>Enroll patient</Button> : <Dropdown title={patient?.name ?? (loading ? 'Loading patients…' : 'Select patient')} placement="bottomEnd" disabled={loading || !!loadError} aria-label="Select patient">
           {patients.map(item => <Dropdown.Item key={item.id} active={item.id === patient?.id} onSelect={() => selectPatient(item.id)}>{item.name}</Dropdown.Item>)}
           {!!patients.length && <Dropdown.Item divider />}
           <Dropdown.Item onSelect={() => { setName(''); setError(null); setOpen(true); }}>Enroll patient</Dropdown.Item>
-        </Dropdown>
+        </Dropdown>}
         <Modal open={open} onClose={() => { if (!saving) setOpen(false); }} size="xs">
           <Modal.Header><Modal.Title>Enroll patient</Modal.Title></Modal.Header>
           <form onSubmit={enroll}>

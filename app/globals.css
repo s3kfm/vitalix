@@ -325,3 +325,9 @@ footer { max-width: 1216px; margin: auto; gap: 16px; flex-wrap: wrap; }
   .assistant-panel, .assistant-thinking span, .assistant-spin { animation: none; }
   .assistant-conversation { scroll-behavior: auto; }
 }
+
+.patient-welcome { display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; padding: clamp(40px, 8vw, 96px) 24px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: 20px; }
+.patient-welcome-icon { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--canvas); color: var(--green); }
+.patient-welcome p { max-width: 440px; color: var(--muted); font-size: 16px; line-height: 1.7; }
+.patient-welcome .button { margin-top: 8px; min-height: 48px; }
+.patient-welcome small { color: var(--muted); line-height: 1.6; }
