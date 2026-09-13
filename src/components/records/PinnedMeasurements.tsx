@@ -36,13 +36,12 @@ export function PinnedMeasurements() {
   });
 
   const measurements = (latestQueries.data ?? [])
-    .map((m, i) => {
-      const def = definitions.data?.[i];
-      if (!m || !def) return null;
+    .map(m => {
+      if (!m) return null;
       const disp = displayValue(m);
       return {
         id: m.id,
-        name: def.name,
+        name: m.definitionName ?? m.definitionSlug ?? 'Unknown measurement',
         value: disp.value,
         unit: disp.unit,
         recordedAt: m.observedAt,

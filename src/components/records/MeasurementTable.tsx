@@ -46,14 +46,13 @@ export function MeasurementTable({ query }: { query: string }) {
 
   // Build the list: definition name + latest measurement (if exists)
   const rows = (latestQueries.data ?? [])
-    .map((m, i) => {
-      const def = definitions.data?.[i];
-      if (!m || !def) return null;
+    .map(m => {
+      if (!m) return null;
       const disp = displayValue(m);
       return {
         id: m.id,
-        name: def.name,
-        slug: def.slug,
+        name: m.definitionName ?? m.definitionSlug ?? 'Unknown measurement',
+        slug: m.definitionSlug,
         value: disp.value,
         unit: disp.unit,
         recordedAt: m.observedAt,
