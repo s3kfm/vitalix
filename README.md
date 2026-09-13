@@ -2,6 +2,9 @@
 
 Personal health records built with Next.js, PostgreSQL, and Drizzle.
 
+[screencast-vitalix-hazel.vercel.app-2026.09.13-11_39_27.webm](https://github.com/user-attachments/assets/6dee41e8-02fe-49ca-bdf1-ad21548bf9f2)
+
+
 ## Local setup
 
 Use Node.js 24 and npm.
