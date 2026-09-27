@@ -35,8 +35,8 @@ export const recordSchema = z.discriminatedUnion('kind', [
   z.object({ key, kind: z.literal('dose'), data: z.object({
     medicationName: z.string().min(1).max(200).describe('Medication name from the lookup or the new medication in this batch.'),
     medicineId: z.string().min(1).describe('Existing medication UUID from lookup, or the key of a new medication in this changeset.'),
-    dose: z.string().min(1).max(200), status: z.enum(['Taken', 'Skipped']), takenAt: timestamp,
-    scheduledTime: time.optional(), notes,
+    dose: z.string().min(1).max(200), status: z.enum(['Taken', 'Skipped']), takenAt: timestamp.nullable().describe('Actual taken time; null for Skipped.'),
+    scheduledTime: time.optional(), scheduledFor: timestamp.optional().describe('Exact scheduled occurrence including timezone; required for a scheduled medication. Never infer it from actual taken time.'), notes,
   }) }),
   z.object({ key, kind: z.literal('measurement'), data: z.object({
     definitionSlug: z.string().min(1), observedAt: timestamp, notes,
@@ -98,7 +98,8 @@ export function recordDetails(record: ProposedRecord, records: ProposedRecord[])
     fields.push(['Dose', record.data.dose], ['Schedule', record.data.schedule.length ? record.data.schedule.join(', ') : 'As needed']);
   } else if (record.kind === 'dose') {
     const medication = records.find(item => item.key === record.data.medicineId && item.kind === 'medication');
-    fields.push(['Medication', medication ? recordTitle(medication) : record.data.medicationName], ['When', date(record.data.takenAt)]);
+    fields.push(['Medication', medication ? recordTitle(medication) : record.data.medicationName], ['When', record.data.takenAt ? date(record.data.takenAt) : 'Not taken']);
+    if (record.data.scheduledFor) fields.push(['Scheduled for', date(record.data.scheduledFor)]);
     if (record.data.scheduledTime) fields.push(['Scheduled', record.data.scheduledTime]);
   } else if (record.kind === 'resolveSymptom') {
     fields.push(['Action', 'Mark as resolved']);

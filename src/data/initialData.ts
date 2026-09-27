@@ -3,9 +3,9 @@ const today = new Date();
 today.setHours(8, 0, 0, 0);
 const morning = today.toISOString();
 export const initialMedicines: Medicine[] = [
-  { id: 'med-1', name: 'Metformin', strength: '500 mg', dose: '1 tablet', schedule: ['08:00', '20:00'], notes: 'With meals', active: true },
-  { id: 'med-2', name: 'Vitamin D', strength: '1,000 IU', dose: '1 softgel', schedule: ['08:00'], notes: '', active: true },
-  { id: 'med-3', name: 'Ibuprofen', strength: '200 mg', dose: '1 tablet', schedule: [], notes: 'As needed', active: true },
+  { id: 'med-1', name: 'Metformin', strength: '500 mg', dose: '1 tablet', schedule: ['08:00', '20:00'], notes: 'With meals', active: true, startDate: null, endDate: null, endedReason: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'med-2', name: 'Vitamin D', strength: '1,000 IU', dose: '1 softgel', schedule: ['08:00'], notes: '', active: true, startDate: null, endDate: null, endedReason: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: 'med-3', name: 'Ibuprofen', strength: '200 mg', dose: '1 tablet', schedule: [], notes: 'As needed', active: true, startDate: null, endDate: null, endedReason: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 export const initialMeasurements: Measurement[] = [
   { id: 'm-1', name: 'Blood pressure', value: '120/80', unit: 'mmHg', recordedAt: morning, pinned: true, notes: 'Seated, before breakfast' },

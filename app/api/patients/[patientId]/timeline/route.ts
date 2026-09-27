@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const doseItems: TimelineItem[] = doseRows.map((d) => ({
       id: d.id,
       kind: 'dose' as const,
-      timestamp: d.takenAt.toISOString(),
+      timestamp: (d.takenAt ?? d.recordedAt).toISOString(),
       createdAt: d.createdAt.toISOString(),
       title: d.name,
       detail: [d.dose, d.status, d.notes].filter(Boolean).join(' · '),

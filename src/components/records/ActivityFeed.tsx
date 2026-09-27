@@ -15,7 +15,7 @@ export function ActivityFeed() {
   const { activity: demoActivity } = useHealthRecords();
   const symptoms = useQuery<SymptomRecord[]>({ queryKey: ['symptoms'] });
   const doses = useQuery<DoseLog[]>({ queryKey: ['doses'] });
-  const activity = [...(doses.data ?? []).map(d => ({ id: d.id, category: 'Medications' as const, title: d.name, detail: [d.dose, d.status, d.notes].filter(Boolean).join(' · '), recordedAt: d.takenAt })), ...demoActivity.filter(item => item.category !== 'Symptoms'), ...(symptoms.data ?? []).map(s => ({ id: s.id, category: 'Symptoms' as const, title: s.code.text ?? 'Symptom', detail: [s.severity !== null ? `${s.severity}/10` : '', s.resolvedAt ? 'Ended' : 'Ongoing', s.notes].filter(Boolean).join(' · '), recordedAt: s.onsetAt }))];
+  const activity = [...(doses.data ?? []).map(d => ({ id: d.id, category: 'Medications' as const, title: d.name, detail: [d.dose, d.status, d.notes].filter(Boolean).join(' · '), recordedAt: d.takenAt ?? d.recordedAt })), ...demoActivity.filter(item => item.category !== 'Symptoms'), ...(symptoms.data ?? []).map(s => ({ id: s.id, category: 'Symptoms' as const, title: s.code.text ?? 'Symptom', detail: [s.severity !== null ? `${s.severity}/10` : '', s.resolvedAt ? 'Ended' : 'Ongoing', s.notes].filter(Boolean).join(' · '), recordedAt: s.onsetAt }))];
   const [filter, setFilter] = useState<View>('All');
   const [query, setQuery] = useState('');
   const entries = activity.filter(a => (filter === 'All' || a.category === filter) && `${a.title} ${a.detail}`.toLowerCase().includes(query.toLowerCase())).sort((a,b) => b.recordedAt.localeCompare(a.recordedAt));

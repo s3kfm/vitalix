@@ -15,7 +15,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "check": "npm run lint && npm run typecheck && npm run build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:seed:medications": "tsx scripts/seed-medications.ts",
+    "test:medications": "node --import tsx --test tests/medications.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.49",

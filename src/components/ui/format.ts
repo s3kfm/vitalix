@@ -1,8 +1,7 @@
 export function formatDate(value: string) {
   return new Date(value).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
-export function localDateTime() {
-  const now = new Date();
+export function localDateTime(now = new Date()) {
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 }
 export function timeLabel(value: string) {

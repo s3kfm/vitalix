@@ -368,3 +368,42 @@ footer { max-width: 1216px; margin: auto; gap: 16px; flex-wrap: wrap; }
   .enrollment-note { margin-top: 20px; padding-top: 20px; }
   .enrollment-card .rs-panel-body { padding: 22px; }
 }
+
+/* Medication routines share the existing Vitalix palette and controls. */
+.medications-page { max-width: 900px; margin: 0 auto; }
+.medications-page > .tabs { background: var(--surface-soft); border-radius: 12px; padding: 4px; display: flex; }
+.medications-page > .tabs button { flex: 1; }
+.medications-page > .tabs .selected { background: #fff; color: var(--ink); box-shadow: 0 1px 3px #3a353008; }
+.medications-page .page-heading { flex-direction: row; }
+.medications-page .page-heading h1 { font-family: var(--font-display); }
+.med-routine { display: grid; gap: 30px; }
+.med-group { display: grid; gap: 10px; }
+.med-group-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 4px; }
+.med-group-heading h2 { font-family: var(--font-body); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .45px; }
+.med-group-heading span, .prn-heading p { font-size: 11px; color: var(--muted); }
+.prn-heading h2 { font-size: 14px; text-transform: none; letter-spacing: -.2px; }
+.dose-card { border: 1px solid var(--line); border-radius: 13px; background: #fff; padding: 14px; box-shadow: 0 1px 2px #3a353008; min-width: 0; }
+.dose-main { display: flex; align-items: flex-start; gap: 12px; }
+.dose-copy { flex: 1; min-width: 0; }
+.dose-copy strong { display: block; font-weight: 550; line-height: 1.3; }
+.dose-copy p { color: var(--muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.dose-clock { font-family: var(--font-mono); font-size: 10px; flex-shrink: 0; max-width: 105px; }
+.dose-clock.overdue { color: #99652f; }
+.dose-actions { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.dose-result { display: flex; gap: 6px; align-items: center; margin-right: auto; font-size: 11px; }
+.dose-card.resolved, .upcoming-list { background: #ffffff80; }
+.upcoming-list { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; }
+.upcoming-list .dose-card { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.upcoming-list .dose-card + .dose-card { border-top: 1px solid var(--line); }
+.upcoming .med-group-heading { color: var(--muted); }
+.one-off-button { border: 1px dashed var(--line); border-radius: 12px; background: transparent; color: var(--muted); padding: 14px; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 12px; }
+.prescription-meta { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 10px 0; color: var(--muted); font-size: 12px; }
+.prescription-items { display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 12px; margin-bottom: 12px; }
+@media (max-width: 600px) {
+  .medications-page .page-heading { align-items: flex-start; gap: 8px; }
+  .medications-page .page-heading .button { flex-shrink: 0; padding: 9px 11px; font-size: 11px; margin-top: 8px; }
+  .medications-page .page-heading > div { min-width: 0; }
+  .medications-page > .tabs button { padding: 9px 8px; font-size: 11px; }
+  .dose-main { gap: 10px; }
+  .dose-main .icon-tile { width: 32px; height: 32px; flex-shrink: 0; }
+}

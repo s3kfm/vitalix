@@ -35,7 +35,7 @@ export async function saveChangeset(
           const medicineId = dependency ? results.get(dependency.key)?.id : record.data.medicineId;
           if (!medicineId) throw new Error('Save the medication first, then retry this dose.');
           endpoint = '/doses';
-          payload = await createDoseSchema.validate({ ...record.data, medicineId }, { stripUnknown: true });
+          payload = await createDoseSchema.validate({ ...record.data, medicineId, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }, { stripUnknown: true });
           break;
         }
         case 'measurement':

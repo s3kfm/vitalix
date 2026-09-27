@@ -1,7 +1,7 @@
-import type { Medication, DoseRecord } from './db/types';
+import type { MedicationRecord, DoseRecord } from './db/types';
 
-export type Medicine = Pick<Medication, 'id' | 'name' | 'strength' | 'dose' | 'schedule' | 'notes' | 'active'>;
-export type DoseLog = Pick<DoseRecord, 'id' | 'medicineId' | 'name' | 'dose' | 'takenAt' | 'status' | 'notes'> & Partial<Pick<DoseRecord, 'scheduledTime'>>;
+export type Medicine = Pick<MedicationRecord, 'id' | 'name' | 'strength' | 'dose' | 'schedule' | 'notes' | 'active' | 'startDate' | 'endDate' | 'endedReason' | 'createdAt' | 'updatedAt'>;
+export type DoseLog = DoseRecord;
 export interface Measurement {
   id: string;
   name: string;

@@ -1,74 +1,43 @@
 'use client';
 import { usePatient } from '@/src/context/PatientContext';
-import { useState, type FormEventHandler } from 'react';
+import { useState, type FormEvent } from 'react';
 import axios from 'axios';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Input, Modal, SelectPicker } from 'rsuite';
+import { useQueryClient } from '@tanstack/react-query';
+import { Button, Input, Modal } from 'rsuite';
 import { FormError } from '../ui/FormError';
 import { createDoseSchema } from '../../lib/validations/medications';
-import type { Medicine } from '../../types';
-import { localDateTime, timeLabel } from '../ui/format';
-
-export function DoseLogModal({ medicine, scheduledTime, onClose }: { medicine: Medicine; scheduledTime?: string; onClose: () => void }) {
+import type { Medicine, DoseLog } from '../../types';
+import { localDateTime } from '../ui/format';
+export function DoseLogModal({ medicine, log, onClose }: { medicine?: Medicine; log?: DoseLog; onClose: () => void }) {
   const { patientUrl } = usePatient();
-  const [selectedTime, setSelectedTime] = useState(scheduledTime ?? (medicine.schedule.length === 1 ? medicine.schedule[0] : ''));
-  const [status, setStatus] = useState<'Taken' | 'Skipped'>('Taken');
-
+  const client = useQueryClient();
+  const [status, setStatus] = useState(log?.status ?? 'Taken');
   const [error, setError] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-  const mutation = useMutation({
-    mutationFn: (data: import("../../lib/validations/medications").CreateDoseInput) => axios.post(patientUrl('/doses'), data),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['doses'] });
-      await queryClient.invalidateQueries({ queryKey: ['timeline'] });
-      onClose();
-    },
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const close = () => { if (!submitting) onClose(); };
-  const onSubmit: FormEventHandler<HTMLFormElement> = async event => {
-    event.preventDefault();
-    if (submitting) return;
-    const fields = new FormData(event.currentTarget);
-    setSubmitting(true);
-    setError(null);
+  const [busy, setBusy] = useState(false);
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); if (busy) return;
+    const fields = new FormData(e.currentTarget); setBusy(true); setError(null);
     try {
-
-      if (medicine.schedule.length && !selectedTime) throw new Error('Choose the scheduled time for this dose.');
-      const when = String(fields.get('when') || '');
-      const data = await createDoseSchema.validate({
-        medicineId: medicine.id, status, scheduledTime: selectedTime || undefined,
-        dose: fields.get('dose'), notes: fields.get('notes'),
-        takenAt: when ? new Date(when).toISOString() : '',
-      }, { stripUnknown: true });
-
-      await mutation.mutateAsync(data);
-    } catch (error) {
-      setError(axios.isAxiosError(error) ? error.response?.data?.error || 'Could not save. Please try again.' : error instanceof Error ? error.message : 'Check your entry.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-  return <Modal open onClose={close} size="sm">
-    <Modal.Header><Modal.Title>{'Log ' + medicine.name}</Modal.Title></Modal.Header>
-    <Modal.Body><form className="entry-form" onSubmit={onSubmit} aria-busy={submitting}>
-      <fieldset disabled={submitting} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }} className="entry-form">
-
-        <label id="dose-status-label">Status</label>
-        <SelectPicker aria-labelledby="dose-status-label" value={status} onChange={v => setStatus(v as 'Taken' | 'Skipped')} cleanable={false} searchable={false} disabled={submitting} data={['Taken', 'Skipped'].map(value => ({ value, label: value }))}/>
-        {medicine.schedule.length > 0 && <label>Scheduled time
-          <select required value={selectedTime} disabled={submitting || !!scheduledTime} onChange={event => setSelectedTime(event.target.value)}>
-            <option value="" disabled>Choose a scheduled time</option>
-            {[...medicine.schedule].sort().map(time => <option key={time} value={time}>{timeLabel(time)}</option>)}
-          </select>
-        </label>}
-        <label>Dose<Input name="dose" required maxLength={200} defaultValue={medicine.dose}/></label>
-        <label>Date and time<Input name="when" type="datetime-local" required defaultValue={localDateTime()} max={localDateTime()}/></label>
-
-        <label>Notes <span className="optional">optional</span><Input as="textarea" rows={3} name="notes" maxLength={5000}/></label>
-      </fieldset>
-      <FormError message={error}/>
-      <div className="form-actions"><Button onClick={close} disabled={submitting}>Cancel</Button><Button appearance="primary" type="submit" loading={submitting}>Add to log</Button></div>
-    </form></Modal.Body>
-  </Modal>;
+      const data = await createDoseSchema.validate({ medicineId: log?.medicineId ?? medicine?.id ?? null, name: log?.name ?? medicine?.name ?? fields.get('name'),
+        dose: fields.get('dose'), notes: fields.get('notes'), status,
+        scheduledFor: log?.scheduledFor ?? null, scheduledTime: log?.scheduledTime ?? null,
+        takenAt: status === 'Taken' ? new Date(String(fields.get('when'))).toISOString() : null,
+      });
+      if (log) await axios.patch(patientUrl(`/doses/${log.id}`), data);
+      else await axios.post(patientUrl('/doses'), data);
+      await Promise.all(['doses', 'timeline'].map(key => client.invalidateQueries({ queryKey: [key] })));
+      onClose();
+    } catch (e) { setError(axios.isAxiosError(e) ? e.response?.data?.error ?? 'Could not save dose.' : e instanceof Error ? e.message : 'Check your entry.'); }
+    finally { setBusy(false); }
+  }
+  return <Modal open onClose={() => !busy && onClose()} size="sm"><Modal.Header><Modal.Title>{log ? 'Edit recorded dose' : medicine ? `Log ${medicine.name}` : 'Record one-off or unlisted medicine'}</Modal.Title></Modal.Header><Modal.Body>
+    <form className="entry-form" onSubmit={submit}><fieldset disabled={busy} className="entry-form" style={{ border: 0, padding: 0 }}>
+      {!medicine && !log && <label>Medication name<Input name="name" required maxLength={200}/></label>}
+      <label>Dose<Input name="dose" required maxLength={200} defaultValue={log?.dose ?? medicine?.dose}/></label>
+      {log && <label>Status<select value={status} onChange={e => setStatus(e.target.value as 'Taken' | 'Skipped')}><option>Taken</option><option>Skipped</option></select></label>}
+      {log?.scheduledFor && <p className="muted">Scheduled for {new Date(log.scheduledFor).toLocaleString()}</p>}
+      {status === 'Taken' && <label>Actually taken at<Input name="when" type="datetime-local" required defaultValue={localDateTime(log?.takenAt ? new Date(log.takenAt) : new Date())} max={localDateTime()}/></label>}
+      <label>Notes <span className="optional">optional</span><Input as="textarea" name="notes" maxLength={5000} defaultValue={log?.notes}/></label>
+    </fieldset><FormError message={error}/><div className="form-actions"><Button disabled={busy} onClick={onClose}>Cancel</Button><Button type="submit" appearance="primary" loading={busy}>Save dose</Button></div></form>
+  </Modal.Body></Modal>;
 }
