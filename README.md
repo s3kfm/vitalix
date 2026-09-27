@@ -16,6 +16,8 @@ cp .env.example .env.local
 
 Set `DATABASE_URL` to your PostgreSQL connection string. For a new, empty database, review and apply the schema with `npm run db:push`, then run `npm run db:seed` to populate measurement definitions. Database commands load Next.js environment files. These commands modify the configured database; use a dedicated development database locally.
 
+Set `BETTER_AUTH_SECRET` to a random secret of at least 32 characters and `BETTER_AUTH_URL` to `http://localhost:4031` locally (your deployed origin in production). Create an account at `/signup` before enrolling patients.
+
 ```sh
 npm run dev
 ```
@@ -33,13 +35,13 @@ The database pool is reused and attached to Vercel's function lifecycle, followi
 
 ## Current deployment limits
 
-This is a shared demo workspace with no authentication. Every visitor can select or enroll any patient; use synthetic data only. Records and assistant requests are scoped to `/api/patients/[patientId]/…`. `GET /api/patients` lists patients and `POST /api/patients` accepts `{ "name": "Demo patient" }`. Measurement definitions remain a global catalogue at `/api/measurements/definitions`. Unknown patient IDs return 404 and never create patients implicitly. The old unscoped record routes have been removed.
+This is a demo project using Better Auth email/password authentication. Each account can access only its own patients. Records and assistant requests are scoped to `/api/patients/[patientId]/…`. `GET /api/patients` lists the signed-in account's patients; enrollment supports name, known allergies, date of birth, and module preferences. Measurement definitions remain a shared catalogue. Unknown or inaccessible patient IDs return 404.
 
 Some overview content is static demo data, and context actions such as report uploads and measurement pinning do not persist yet.
 
-## Updating an existing database
+## Database setup approach
 
-If your `patients` table still has `auth_user_id`, apply [drizzle/patients.sql](drizzle/patients.sql) once before running `npm run db:push`. It adds patient names and removes the old user mapping while preserving patient IDs and linked records. Fresh databases only need the regular `db:push` setup.
+For this demo, use the current Drizzle schema with `npm run db:push`, followed by `npm run db:seed`. There is no maintained migration history or legacy-account migration. Better Auth uses the PostgreSQL pool directly at runtime; its tables are also defined in `src/db/auth.ts`, so Drizzle creates both auth and application tables. Do not run a separate Better Auth migration flow. Historical SQL snippets under `drizzle/` are not needed for a fresh database. Resetting demo data removes existing accounts and patient records; sign up again afterward.
 
 ## Database types
 

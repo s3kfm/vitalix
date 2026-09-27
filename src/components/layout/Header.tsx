@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, type ReactNode, type FormEvent } from 'react';
-import { Dropdown, Modal, Button, Input } from 'rsuite';
+import { useState, type ReactNode } from 'react';
+import { Dropdown, Button } from 'rsuite';
+import { authClient } from '@/src/lib/auth/client';
+import { toast } from 'sonner';
+import { PatientDetailsModal } from '@/src/components/patients/PatientDetailsModal';
+import type { Patient } from '@/src/lib/patients';
 import { usePatient } from '@/src/context/PatientContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity } from 'lucide-react';
+import { Activity, LogOut, UserRound } from 'lucide-react';
 
 
 interface NavigationItem {
@@ -21,24 +25,22 @@ const navigation: readonly NavigationItem[] = [
   { href: '/medications', label: 'Medications' },
 ];
 
-export function Header({ children }: { children?: ReactNode }) {
-  const { patients, patient, selectPatient, enrollPatient, loading, error: loadError, enrollmentOpen: open, setEnrollmentOpen: setOpen } = usePatient();
-  const [name, setName] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  async function enroll(event: FormEvent) {
-    event.preventDefault();
-    if (saving || !name.trim()) return;
-    setSaving(true);
-    setError(null);
+export function Header({ email, children }: { email: string; children?: ReactNode }) {
+  const [loggingOut, setLoggingOut] = useState(false);
+  async function logout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
     try {
-      await enrollPatient(name.trim());
-      setOpen(false);
-      setName('');
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not enroll patient.');
-    } finally { setSaving(false); }
+      const result = await authClient.signOut();
+      if (result.error) throw new Error(result.error.message || 'Could not log out.');
+      window.location.assign('/login');
+    } catch {
+      toast.error('Could not log out. Please try again.');
+      setLoggingOut(false);
+    }
   }
+  const { patients, patient, selectPatient, loading, error: loadError, enrollmentOpen: open, setEnrollmentOpen: setOpen } = usePatient();
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const pathname = usePathname();
 
   return (
@@ -63,22 +65,21 @@ export function Header({ children }: { children?: ReactNode }) {
         {!loading && !loadError && !patients.length ? <Button appearance="primary" onClick={() => setOpen(true)}>Enroll patient</Button> : <Dropdown title={patient?.name ?? (loading ? 'Loading patients…' : 'Select patient')} placement="bottomEnd" disabled={loading || !!loadError} aria-label="Select patient">
           {patients.map(item => <Dropdown.Item key={item.id} active={item.id === patient?.id} onSelect={() => selectPatient(item.id)}>{item.name}</Dropdown.Item>)}
           {!!patients.length && <Dropdown.Item divider />}
-          <Dropdown.Item onSelect={() => { setName(''); setError(null); setOpen(true); }}>Enroll patient</Dropdown.Item>
+          {patient && <Dropdown.Item onSelect={() => setEditingPatient(patient)}>Edit patient</Dropdown.Item>}
+          <Dropdown.Item onSelect={() => setOpen(true)}>Enroll patient</Dropdown.Item>
         </Dropdown>}
-        <Modal open={open} onClose={() => { if (!saving) setOpen(false); }} size="xs">
-          <Modal.Header><Modal.Title>Enroll patient</Modal.Title></Modal.Header>
-          <form onSubmit={enroll}>
-            <Modal.Body>
-              <label htmlFor="patient-name">Patient name</label>
-              <Input id="patient-name" value={name} onChange={setName} maxLength={200} autoFocus disabled={saving} />
-              {error && <p role="alert">{error}</p>}
-            </Modal.Body>
-            <Modal.Footer>
-              <Button appearance="subtle" disabled={saving} onClick={() => setOpen(false)}>Cancel</Button>
-              <Button appearance="primary" type="submit" loading={saving} disabled={!name.trim()}>Enroll patient</Button>
-            </Modal.Footer>
-          </form>
-        </Modal>
+        {open && <PatientDetailsModal onClose={() => setOpen(false)} />}
+        {editingPatient && <PatientDetailsModal key={editingPatient.id} patient={editingPatient} onClose={() => setEditingPatient(null)} />}
+        <Dropdown
+          placement="bottomEnd"
+          aria-label={`Account: ${email}`}
+          title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <UserRound size={18} aria-hidden="true" />
+            <span title={email} style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</span>
+          </span>}
+        >
+          <Dropdown.Item disabled={loggingOut} onSelect={() => { void logout(); }} icon={<LogOut size={16} aria-hidden="true" />}>{loggingOut ? 'Logging out…' : 'Log out'}</Dropdown.Item>
+        </Dropdown>
         {children}
       </div>
     </header>

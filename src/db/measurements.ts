@@ -1,18 +1,24 @@
 import type { CodeableConcept, ObservationReferenceRange } from 'fhir/r4';
 import type { ComponentDefinition } from '../lib/measurements/catalog';
 import type { MeasurementResult } from '../lib/measurements/result';
+import { users } from './auth';
+import { defaultPatientModules, type PatientModule } from '../lib/patients';
 import { sql } from 'drizzle-orm';
-import { check, index, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { check, date, index, integer, jsonb, numeric, pgEnum, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 
 export const measurementStatus = pgEnum('measurement_status', ['final', 'amended', 'entered-in-error']);
 export const groupSource = pgEnum('group_source', ['manual', 'ai']);
 
 // ---------------------------------------------------------------------------
-// Shared demo patients, enrolled explicitly without authentication.
+// Patients belong to the account that enrolled them.
 // ---------------------------------------------------------------------------
 export const patients = pgTable('patients', {
   id: uuid("id").defaultRandom().primaryKey(),
+  ownerUserId: uuid("owner_user_id").references(() => users.id),
   name: text("name").notNull(),
+  knownAllergies: text("known_allergies").default('').notNull(),
+  dateOfBirth: date("date_of_birth"),
+  enabledModules: jsonb("enabled_modules").$type<PatientModule[]>().default(defaultPatientModules).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

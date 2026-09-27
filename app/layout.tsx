@@ -1,3 +1,4 @@
+import { currentUser } from '@/src/lib/auth/session';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -18,7 +19,9 @@ export const metadata: Metadata = {
   description: 'Your personal health record. Track measurements, symptoms, and medications in one place.',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const user = await currentUser();
+  if (!user) return <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}><body>{children}</body></html>;
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
@@ -27,7 +30,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <HealthRecordsProvider>
               <a className="skip-link" href="#main-content">Skip to content</a>
               <div className="app-shell">
-                <Header />
+                <Header email={user.email} />
                 <div className="main-shell">
                   <main id="main-content"><PatientWorkspace>{children}</PatientWorkspace></main>
                   <footer>

@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-export interface Patient { id: string; name: string }
+import type { Patient, PatientDetails } from '@/src/lib/patients';
+export type { Patient } from '@/src/lib/patients';
 interface PatientContextValue {
   enrollmentOpen: boolean;
   setEnrollmentOpen: (open: boolean) => void;
@@ -11,7 +12,8 @@ interface PatientContextValue {
   loading: boolean;
   error: string | null;
   selectPatient: (id: string) => void;
-  enrollPatient: (name: string) => Promise<void>;
+  enrollPatient: (details: PatientDetails) => Promise<void>;
+  updatePatient: (id: string, details: PatientDetails) => Promise<void>;
   reload: () => void;
   patientUrl: (path: string) => string;
 }
@@ -46,9 +48,9 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     return () => controller.abort();
   }, [revision]);
   const patient = patients.find(p => p.id === patientId) ?? null;
-  async function enrollPatient(name: string) {
+  async function enrollPatient(details: PatientDetails) {
     const response = await fetch('/api/patients', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(details),
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error || 'Could not enroll patient.');
@@ -56,8 +58,16 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     setPatients(current => [...current, created]);
     setPatientId(created.id);
   }
+  async function updatePatient(id: string, details: PatientDetails) {
+    const response = await fetch(`/api/patients/${id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(details),
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error || 'Could not update patient.');
+    setPatients(current => current.map(item => item.id === id ? body as Patient : item));
+  }
   return <Context.Provider value={{ patients, patient, loading, error, enrollmentOpen, setEnrollmentOpen,
-    selectPatient: setPatientId, enrollPatient, reload: () => setRevision(n => n + 1),
+    selectPatient: setPatientId, enrollPatient, updatePatient, reload: () => setRevision(n => n + 1),
     patientUrl: path => {
       if (!patient) throw new Error('Select a patient first.');
       return `/api/patients/${patient.id}${path}`;

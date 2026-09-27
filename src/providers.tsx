@@ -37,7 +37,7 @@ export function PatientWorkspace({ children, quiet = false }: { children: ReactN
       <h1 id="patient-welcome-title">Your health record starts here</h1>
       <p>Enroll your first patient to keep measurements, medications, and symptoms together in one place.</p>
       <button className="button" onClick={() => setEnrollmentOpen(true)}><UserPlus size={18} aria-hidden="true" />Enroll your first patient</button>
-      <small>Start with a name. Add health records whenever you’re ready.</small>
+      <small>Add patient details and choose their modules.</small>
     </section>
   );
   return children;
