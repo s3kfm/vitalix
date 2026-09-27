@@ -5,8 +5,6 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { Patient, PatientDetails } from '@/src/lib/patients';
 export type { Patient } from '@/src/lib/patients';
 interface PatientContextValue {
-  enrollmentOpen: boolean;
-  setEnrollmentOpen: (open: boolean) => void;
   patients: Patient[];
   patient: Patient | null;
   loading: boolean;
@@ -19,14 +17,14 @@ interface PatientContextValue {
 }
 const Context = createContext<PatientContextValue | null>(null);
 
-export function PatientProvider({ children }: { children: ReactNode }) {
-  const [enrollmentOpen, setEnrollmentOpen] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [patientId, setPatientId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+export function PatientProvider({ children, initialPatients }: { children: ReactNode; initialPatients: Patient[] }) {
+  const [patients, setPatients] = useState<Patient[]>(initialPatients);
+  const [patientId, setPatientId] = useState<string | null>(initialPatients[0]?.id ?? null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
   useEffect(() => {
+    if (revision === 0) return;
     const controller = new AbortController();
     async function load() {
       setLoading(true);
@@ -66,7 +64,7 @@ export function PatientProvider({ children }: { children: ReactNode }) {
     if (!response.ok) throw new Error(body.error || 'Could not update patient.');
     setPatients(current => current.map(item => item.id === id ? body as Patient : item));
   }
-  return <Context.Provider value={{ patients, patient, loading, error, enrollmentOpen, setEnrollmentOpen,
+  return <Context.Provider value={{ patients, patient, loading, error,
     selectPatient: setPatientId, enrollPatient, updatePatient, reload: () => setRevision(n => n + 1),
     patientUrl: path => {
       if (!patient) throw new Error('Select a patient first.');

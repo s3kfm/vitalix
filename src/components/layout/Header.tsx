@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Dropdown, Button } from 'rsuite';
+import { Dropdown } from 'rsuite';
 import { authClient } from '@/src/lib/auth/client';
 import { toast } from 'sonner';
 import { PatientDetailsModal } from '@/src/components/patients/PatientDetailsModal';
 import type { Patient } from '@/src/lib/patients';
 import { usePatient } from '@/src/context/PatientContext';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Activity, LogOut, UserRound } from 'lucide-react';
 
 
@@ -39,9 +39,11 @@ export function Header({ email, children }: { email: string; children?: ReactNod
       setLoggingOut(false);
     }
   }
-  const { patients, patient, selectPatient, loading, error: loadError, enrollmentOpen: open, setEnrollmentOpen: setOpen } = usePatient();
+  const { patients, patient, selectPatient, loading, error: loadError } = usePatient();
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+  const enrolling = pathname === '/enroll';
 
   return (
     <header className="site-header">
@@ -50,7 +52,7 @@ export function Header({ email, children }: { email: string; children?: ReactNod
           <span className="brand-icon"><Activity size={21} /></span>
           Vitalix
         </Link>
-        <nav aria-label="Main navigation">
+        {!enrolling && <nav aria-label="Main navigation">
           {navigation.map(({ href, label }) => (
             <Link
               key={href}
@@ -61,14 +63,13 @@ export function Header({ email, children }: { email: string; children?: ReactNod
               {label}
             </Link>
           ))}
-        </nav>
-        {!loading && !loadError && !patients.length ? <Button appearance="primary" onClick={() => setOpen(true)}>Enroll patient</Button> : <Dropdown title={patient?.name ?? (loading ? 'Loading patients…' : 'Select patient')} placement="bottomEnd" disabled={loading || !!loadError} aria-label="Select patient">
+        </nav>}
+        {!enrolling && <Dropdown title={patient?.name ?? (loading ? 'Loading patients…' : 'Select patient')} placement="bottomEnd" disabled={loading || !!loadError} aria-label="Select patient">
           {patients.map(item => <Dropdown.Item key={item.id} active={item.id === patient?.id} onSelect={() => selectPatient(item.id)}>{item.name}</Dropdown.Item>)}
           {!!patients.length && <Dropdown.Item divider />}
           {patient && <Dropdown.Item onSelect={() => setEditingPatient(patient)}>Edit patient</Dropdown.Item>}
-          <Dropdown.Item onSelect={() => setOpen(true)}>Enroll patient</Dropdown.Item>
+          <Dropdown.Item onSelect={() => router.push('/enroll')}>Enroll patient</Dropdown.Item>
         </Dropdown>}
-        {open && <PatientDetailsModal onClose={() => setOpen(false)} />}
         {editingPatient && <PatientDetailsModal key={editingPatient.id} patient={editingPatient} onClose={() => setEditingPatient(null)} />}
         <Dropdown
           placement="bottomEnd"
