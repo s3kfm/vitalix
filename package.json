@@ -18,7 +18,7 @@
     "format:check": "prettier --check .",
     "db:seed:medications": "tsx scripts/seed-medications.ts",
     "test:medications": "node --import tsx --test tests/medications.test.mjs",
-    "test:cycles": "node --import tsx --test tests/cycles.test.mjs tests/cycles.integration.test.mjs"
+    "test:cycles": "node --import tsx --test tests/cycles.test.mjs tests/cycle-presentation.test.mjs tests/cycles.integration.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.49",

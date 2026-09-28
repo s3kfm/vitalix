@@ -179,3 +179,17 @@ test('validation permits a single signal and explicit clearing; rejects invalid 
   }
   assert.equal(updateCycleObservationSchema.safeParse({}).success, false);
 });
+
+test('explicit period starts preserve reported facts without inventing flow', () => {
+  const rows = [observation(1, { periodStarted: true }), observation(8, { periodStarted: true })];
+  assert.equal(deriveCycleStarts(rows, date(10)).length, 2);
+  assert.equal(state(1, rows).phase, 'menstrual');
+  assert.equal(rows[0].bleedingLevel, null);
+});
+test('LH evidence moves predictions with a window, never a confirmation', () => {
+  const result = state(20, [observation(20, { lhResult: 'positive' })]);
+  assert.equal(result.reasoning.ovulationWindowStart, '2026-01-20T00:00:00.000Z');
+  assert.equal(result.reasoning.ovulationWindowEnd, '2026-01-22T00:00:00.000Z');
+  assert.equal(result.predictedOvulationAt.toISOString(), '2026-01-21T00:00:00.000Z');
+  assert.equal(result.ovulationStatus, 'likely');
+});

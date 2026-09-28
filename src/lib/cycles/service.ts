@@ -11,6 +11,7 @@ import { calculateCycleState, deriveCycleStarts, learnProfile, predictCycle } fr
 import type {
   CreateCycleObservationInput,
   UpdateCycleObservationInput,
+  CycleSetupInput,
 } from '../validations/cycles';
 
 type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -43,7 +44,26 @@ async function reconcile(tx: Transaction, patientId: string, now: Date) {
     .from(menstrualCycles)
     .where(eq(menstrualCycles.patientId, patientId));
   const starts = deriveCycleStarts(observations, now);
-  const profile = learnProfile(starts, observations);
+  const [savedProfile] = await tx
+    .select()
+    .from(patientCycleProfiles)
+    .where(eq(patientCycleProfiles.patientId, patientId));
+  const preferences = savedProfile?.preferences;
+  const typical = preferences?.typicalCycleLengthDays ?? 28;
+  const spread = preferences?.regularity === 'irregular' ? 14 : 7;
+  const profile = learnProfile(
+    starts,
+    observations,
+    preferences
+      ? {
+          typicalCycleLengthDays: typical,
+          typicalPeriodLengthDays: preferences.typicalPeriodLengthDays ?? 5,
+          cycleLengthMinDays: Math.max(10, typical - spread),
+          cycleLengthMaxDays: typical + spread,
+          irregularCycles: preferences.regularity === 'irregular',
+        }
+      : undefined,
+  );
   await tx
     .insert(patientCycleProfiles)
     .values({ patientId, ...profile, lastCalculatedAt: now })
@@ -211,4 +231,51 @@ export async function deleteCycleObservation(patientId: string, id: string) {
 export async function getCurrentCycleState(patientId: string) {
   // Recalculate on reads: confidence must decay even when nobody logs new observations.
   return withPatientLock(patientId, (tx) => refreshState(tx, patientId, new Date()));
+}
+
+export async function getCycleOverview(patientId: string) {
+  return withPatientLock(patientId, async (tx) => {
+    const state = await refreshState(tx, patientId, new Date());
+    const [profile] = await tx
+      .select()
+      .from(patientCycleProfiles)
+      .where(eq(patientCycleProfiles.patientId, patientId));
+    const observations = await tx
+      .select()
+      .from(cycleObservations)
+      .where(eq(cycleObservations.patientId, patientId))
+      .orderBy(asc(cycleObservations.observedAt));
+    const cycles = await tx
+      .select()
+      .from(menstrualCycles)
+      .where(eq(menstrualCycles.patientId, patientId))
+      .orderBy(asc(menstrualCycles.startedAt));
+    return { state: state!, profile: profile ?? null, observations, cycles };
+  });
+}
+
+export async function setupCycleTracking(patientId: string, input: CycleSetupInput) {
+  return withPatientLock(patientId, async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(patientCycleProfiles)
+      .where(eq(patientCycleProfiles.patientId, patientId));
+    // Retries cannot duplicate the initial period-start observation.
+    if (existing?.preferences) return;
+    const { lastPeriodStartedAt, ...preferences } = input;
+    await tx
+      .insert(patientCycleProfiles)
+      .values({ patientId, preferences })
+      .onConflictDoUpdate({ target: patientCycleProfiles.patientId, set: { preferences } });
+    if (lastPeriodStartedAt) {
+      await tx
+        .insert(cycleObservations)
+        .values({
+          patientId,
+          observedAt: new Date(`${lastPeriodStartedAt}T00:00:00Z`),
+          periodStarted: true,
+        });
+    }
+    await reconcile(tx, patientId, new Date());
+  });
 }

@@ -3,10 +3,10 @@ import type { cycleObservations, cycleStates, patientCycleProfiles } from '../..
 export type Observation = Pick<
   typeof cycleObservations.$inferSelect,
   'id' | 'observedAt' | 'bleedingLevel' | 'cervicalMucus' | 'lhResult' | 'basalTemperatureCelsius'
->;
+> & { periodStarted?: boolean | null };
 export type Profile = Omit<
   typeof patientCycleProfiles.$inferSelect,
-  'patientId' | 'lastCalculatedAt'
+  'patientId' | 'lastCalculatedAt' | 'preferences'
 >;
 export type State = Omit<typeof cycleStates.$inferInsert, 'id' | 'patientId' | 'cycleId'>;
 const DAY = 86_400_000;
@@ -29,9 +29,15 @@ const ordered = (observations: Observation[], now: Date) =>
 export function deriveCycleStarts(observations: Observation[], now: Date): Date[] {
   const starts: Date[] = [];
   let lastBleedingDay: number | undefined;
-  for (const observation of ordered(observations, now).filter(meaningful)) {
+  for (const observation of ordered(observations, now).filter(
+    (o) => meaningful(o) || o.periodStarted,
+  )) {
     const day = utcDay(observation.observedAt);
-    if (lastBleedingDay === undefined || day - lastBleedingDay >= 10)
+    if (
+      lastBleedingDay === undefined ||
+      day - lastBleedingDay >= 10 ||
+      (observation.periodStarted && !starts.some((start) => utcDay(start) === day))
+    )
       starts.push(plusDays(observation.observedAt, 0));
     lastBleedingDay = day;
   }
@@ -130,7 +136,7 @@ export function calculateCycleState({
     rows.filter((o) => o[field] !== null).at(-1);
   const lh = latest('lhResult');
   const mucus = latest('cervicalMucus');
-  const bleeding = latest('bleedingLevel');
+  const bleeding = rows.filter((o) => o.bleedingLevel !== null || o.periodStarted).at(-1);
   const lhEvidence =
     lh && age(lh) <= 2 && ['positive', 'peak'].includes(lh.lhResult!)
       ? lh.lhResult === 'peak'
@@ -139,7 +145,8 @@ export function calculateCycleState({
       : 0;
   const mucusEvidence =
     mucus && age(mucus) <= 2 && ['watery', 'egg_white'].includes(mucus.cervicalMucus!) ? 0.55 : 0;
-  const bleedingEvidence = bleeding && age(bleeding) <= 1 && meaningful(bleeding) ? 0.9 : 0;
+  const bleedingEvidence =
+    bleeding && age(bleeding) <= 1 && (meaningful(bleeding) || bleeding.periodStarted) ? 0.9 : 0;
   const rise = temperatureRise(rows);
   const riseAge = rise ? utcDay(now) - utcDay(rise) : Infinity;
   const temperatureEvidence = riseAge <= 16 ? 0.8 : 0;
@@ -202,6 +209,18 @@ export function calculateCycleState({
   } else if (prediction && now < prediction.predictedOvulationAt) {
     state.phase = now >= state.fertileWindowStart! ? 'fertile' : 'follicular';
     state.phaseConfidence = confidence;
+  }
+  // Expose the evidence window separately from calendar estimates; no exact confirmed date.
+  if (!bleedingEvidence && (temperatureEvidence || lhEvidence)) {
+    const event = temperatureEvidence ? rise! : lh!.observedAt;
+    const start = plusDays(event, temperatureEvidence ? -2 : 0);
+    const end = plusDays(event, temperatureEvidence ? 0 : 2);
+    state.reasoning.ovulationWindowStart = start.toISOString();
+    state.reasoning.ovulationWindowEnd = end.toISOString();
+    state.predictedOvulationAt = plusDays(start, 1);
+    state.predictedNextPeriodAt = plusDays(start, 15);
+    state.fertileWindowStart = plusDays(start, -5 - (profile.irregularCycles ? 2 : 0));
+    state.fertileWindowEnd = plusDays(end, 1 + (profile.irregularCycles ? 2 : 0));
   }
   return state;
 }

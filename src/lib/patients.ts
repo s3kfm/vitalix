@@ -5,7 +5,7 @@ export const patientModules: { id: PatientModule; label: string; description?: s
   { id: 'measurements', label: 'Measurements & Labs' },
   { id: 'symptoms', label: 'Symptoms' },
   { id: 'medications', label: 'Medications', description: 'Includes dose tracking' },
-  { id: 'ovulation', label: 'Ovulation Tracker', description: 'Coming later' },
+  { id: 'ovulation', label: 'Cycle & ovulation', description: 'Period and ovulation tracking' },
 ];
 export const defaultPatientModules: PatientModule[] = ['timeline', 'measurements', 'symptoms', 'medications'];
 export interface PatientDetails {

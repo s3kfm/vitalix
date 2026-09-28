@@ -41,6 +41,8 @@ export type CycleReasoning = {
   lhEvidence?: number;
   mucusEvidence?: number;
   temperatureEvidence?: number;
+  ovulationWindowStart?: string;
+  ovulationWindowEnd?: string;
 };
 const time = (name: string) => timestamp(name, { withTimezone: true });
 
@@ -56,6 +58,11 @@ export const patientCycleProfiles = pgTable(
     cycleLengthMaxDays: integer('cycle_length_max_days').notNull().default(35),
     irregularCycles: boolean('irregular_cycles').notNull().default(false),
     lastCalculatedAt: time('last_calculated_at'),
+    preferences: jsonb('preferences').$type<{
+      typicalCycleLengthDays: number | null;
+      typicalPeriodLengthDays: number | null;
+      regularity: 'regular' | 'irregular' | 'unknown';
+    }>(),
   },
   (t) => [
     check(
@@ -104,6 +111,7 @@ export const cycleObservations = pgTable(
     cycleId: uuid('cycle_id'),
     observedAt: time('observed_at').notNull(),
     bleedingLevel: text('bleeding_level', { enum: bleedingLevels }),
+    periodStarted: boolean('period_started'),
     cervicalMucus: text('cervical_mucus', { enum: mucusTypes }),
     lhResult: text('lh_result', { enum: lhResults }),
     basalTemperatureCelsius: doublePrecision('basal_temperature_celsius'),

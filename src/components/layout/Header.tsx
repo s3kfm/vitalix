@@ -23,6 +23,7 @@ const navigation: readonly NavigationItem[] = [
   { href: '/vitals-and-labs', label: 'Measurements & Labs' },
   { href: '/symptoms', label: 'Symptoms' },
   { href: '/medications', label: 'Medications' },
+  { href: '/ovulation', label: 'Cycle & ovulation' },
 ];
 
 export function Header({ email, children }: { email: string; children?: ReactNode }) {

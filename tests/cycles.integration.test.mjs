@@ -166,6 +166,42 @@ test(
         /Failed query/,
       );
       assert.equal((await service.listCycleObservations(patientId)).length, 2);
+      const setupId = randomUUID();
+      await pool.query('INSERT INTO patients (id, name) VALUES ($1, $2)', [setupId, 'Setup test']);
+      const answers = {
+        lastPeriodStartedAt: '2026-01-05',
+        typicalCycleLengthDays: 35,
+        typicalPeriodLengthDays: 6,
+        regularity: 'irregular',
+      };
+      await service.setupCycleTracking(setupId, answers);
+      await service.setupCycleTracking(setupId, answers);
+      let overview = await service.getCycleOverview(setupId);
+      assert.equal(overview.observations.length, 1, 'Setup retries do not duplicate observations');
+      assert.equal(overview.observations[0].periodStarted, true);
+      assert.equal(
+        overview.observations[0].bleedingLevel,
+        null,
+        'Setup never invents bleeding intensity',
+      );
+      assert.equal(overview.profile.typicalCycleLengthDays, 35);
+      assert.equal(overview.profile.irregularCycles, true);
+      const startId = overview.observations[0].id;
+      await service.updateCycleObservation(setupId, startId, {
+        observedAt: '2026-01-03T00:00:00Z',
+      });
+      overview = await service.getCycleOverview(setupId);
+      assert.equal(overview.cycles[0].startedAt.toISOString(), '2026-01-03T00:00:00.000Z');
+      assert.equal(overview.profile.typicalPeriodLengthDays, 6, 'Reported defaults survive edits');
+      await service.deleteCycleObservation(setupId, startId);
+      overview = await service.getCycleOverview(setupId);
+      assert.equal(overview.state.cycleId, null);
+      assert.equal(overview.profile.typicalCycleLengthDays, 35);
+      assert.deepEqual(overview.profile.preferences, {
+        typicalCycleLengthDays: 35,
+        typicalPeriodLengthDays: 6,
+        regularity: 'irregular',
+      });
     } finally {
       await pool.end();
     }

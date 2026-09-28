@@ -51,3 +51,15 @@ Thresholds are deliberately simple and replaceable. The schema reserves `confirm
 The generated `cycle_tracking` migration and snapshot belong to the existing Drizzle migration chain. Apply with `npm run db:migrate` in the intended environment.
 
 Run `npm run test:cycles` for inference and validation tests. Persistence tests are opt-in: set `CYCLE_TEST_DATABASE_URL` to an **empty, disposable PostgreSQL database**. They refuse a database that already contains public tables, apply the entire migration chain, and leave their test data there. They cover concurrent logging, boundary corrections, deletes, patient isolation, constraints, and transaction rollback.
+
+## Cycle experience
+
+The authenticated `/ovulation` page is available from **Cycle & ovulation** in the main navigation. It includes a current summary, confidence labels, date ranges, monthly calendar, editable observation timeline, and a lightweight logging drawer. Predictions use dashed/hatched marks; recorded bleeding uses solid dots, and likely ovulation has a separate outlined marker. A selected calendar day filters the timeline. Future days cannot be logged.
+
+`GET /api/patients/:patientId/cycles` returns an atomic overview of state, profile, observations, and cycles. `POST .../cycles/setup` accepts optional last-period start and usual lengths plus regular/irregular/unknown. Setup is idempotent. Reported preferences are stored separately from learned values and survive observation corrections. A period start is an explicit nullable observation (`periodStarted`), rather than an invented flow level. It can be edited or removed like any other observation.
+
+The `cycle_experience` migration adds these preferences and period-start fields. Apply it with the normal migration command before opening the new page against an existing database.
+
+Recent LH or sustained-temperature evidence now supplies an inferred ovulation window in `reasoning`, and shifts predicted timing without confirming it. UI ranges widen at lower confidence; past estimates are labelled as earlier estimates instead of alarming late-period messages. Explanations show the observations contributing to the inference. All displayed dates remain UTC to match backend day boundaries.
+
+`npm run test:cycles` also runs the presentation tests. The disposable PostgreSQL integration suite now verifies setup retries, preservation of user defaults, and editing/deleting the initial period start.
