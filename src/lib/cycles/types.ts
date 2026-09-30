@@ -9,3 +9,4 @@ export type Profile = Omit<
   'patientId' | 'lastCalculatedAt' | 'preferences'
 >;
 export type State = Omit<typeof cycleStates.$inferInsert, 'id' | 'patientId' | 'cycleId'>;
+export type Preferences = NonNullable<(typeof patientCycleProfiles.$inferSelect)['preferences']>;

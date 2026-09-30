@@ -24,6 +24,13 @@ export const PROFILE_LEARNING = {
   maxPeriodScanDays: 15,
 };
 
+/** Range around the cycle length a patient reports in setup, before there is history to learn from. */
+export const REPORTED_RANGE = {
+  regularSpreadDays: 7,
+  irregularSpreadDays: 14,
+  minCycleLengthDays: 10,
+};
+
 /** Ovulation happens this many days before the next period. */
 export const LUTEAL_PHASE_DAYS = 14;
 

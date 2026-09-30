@@ -1,9 +1,9 @@
 import { groupBy } from 'es-toolkit';
 import { addDays, daysBetween, utcDay } from '../math/days';
 import { roundedMedian } from '../math/stats';
-import { DEFAULT_CYCLE, LUTEAL_PHASE_DAYS, PROFILE_LEARNING } from './config';
+import { DEFAULT_CYCLE, LUTEAL_PHASE_DAYS, PROFILE_LEARNING, REPORTED_RANGE } from './config';
 import { isPeriodBleeding } from './evidence';
-import type { Observation, Profile } from './types';
+import type { Observation, Preferences, Profile } from './types';
 
 /** Days between consecutive cycle starts, most recent cycles only. */
 function cycleLengths(starts: Date[]) {
@@ -91,5 +91,19 @@ export function predictCycle(start: Date, profile: Profile) {
       start,
       Math.max(1, profile.typicalCycleLengthDays - LUTEAL_PHASE_DAYS),
     ),
+  };
+}
+
+/** Starting profile built from what the patient reported in setup. */
+export function profileFromPreferences(preferences: Preferences): Profile {
+  const typical = preferences.typicalCycleLengthDays ?? DEFAULT_CYCLE.lengthDays;
+  const irregular = preferences.regularity === 'irregular';
+  const spread = irregular ? REPORTED_RANGE.irregularSpreadDays : REPORTED_RANGE.regularSpreadDays;
+  return {
+    typicalCycleLengthDays: typical,
+    typicalPeriodLengthDays: preferences.typicalPeriodLengthDays ?? DEFAULT_CYCLE.periodLengthDays,
+    cycleLengthMinDays: Math.max(REPORTED_RANGE.minCycleLengthDays, typical - spread),
+    cycleLengthMaxDays: typical + spread,
+    irregularCycles: irregular,
   };
 }
