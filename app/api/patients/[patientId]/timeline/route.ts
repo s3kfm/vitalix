@@ -4,7 +4,7 @@ import { db } from '@/src/db';
 import { symptoms } from '@/src/db/symptoms';
 import { medications, medicationDoses } from '@/src/db/medications';
 import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import type { SymptomRecord, DoseRecord, ApiMeasurement, MedicationRecord } from '@/src/db/types';
 
 export type TimelineItemKind = 'symptom' | 'dose' | 'measurement' | 'medication';
@@ -21,8 +21,9 @@ export interface TimelineItem {
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
 
     // 1. Symptoms
     const symptomRows = await db

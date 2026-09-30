@@ -1,6 +1,6 @@
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { createAgentUIStreamResponse } from 'ai';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createHealthAgent } from '@/src/lib/assistant/agent';
 import { attachmentTypes, maxFileBytes, maxRequestBytes } from '@/src/lib/assistant/attachments';
@@ -22,8 +22,8 @@ const requestSchema = z.object({
 export async function POST(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   if (!process.env.ANTHROPIC_API_KEY) return new Response('The assistant needs an Anthropic API key. Add ANTHROPIC_API_KEY to the server environment.', { status: 503 });
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
     // Bound inline attachments before parsing, including chunked requests.
     const reader = request.body?.getReader();
     if (!reader) return new Response('A message is required.', { status: 400 });

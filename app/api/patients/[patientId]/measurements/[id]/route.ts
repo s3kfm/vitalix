@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq, and } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { updateMeasurementSchema } from '@/src/lib/validations/measurements';
 import type { MeasurementResult } from '@/src/lib/measurements/result';
 
@@ -15,9 +15,9 @@ export async function GET(
   { params }: { params: Promise<{ patientId: string; id: string }> }
 ) {
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
-    const { id } = await params;
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient, params: { id } } = found;
 
     const [measurement] = await db
       .select()
@@ -68,9 +68,9 @@ export async function PUT(
   { params }: { params: Promise<{ patientId: string; id: string }> }
 ) {
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
-    const { id } = await params;
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient, params: { id } } = found;
 
     const [existing] = await db
       .select()
@@ -146,9 +146,9 @@ export async function DELETE(
   { params }: { params: Promise<{ patientId: string; id: string }> }
 ) {
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
-    const { id } = await params;
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient, params: { id } } = found;
 
     const [existing] = await db
       .select()

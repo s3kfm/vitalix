@@ -3,13 +3,14 @@ import { desc, eq, getTableColumns } from 'drizzle-orm';
 import { ValidationError } from 'yup';
 import { db } from '@/src/db';
 import { prescriptions } from '@/src/db/medications';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { prescriptionSchema } from '@/src/lib/validations/medications';
 type Context = { params: Promise<{ patientId: string }> };
 export async function GET(_request: NextRequest, { params }: Context) {
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     const columns = getTableColumns(prescriptions);
     const { attachmentData: _data, ...publicColumns } = columns;
     void _data;
@@ -18,8 +19,9 @@ export async function GET(_request: NextRequest, { params }: Context) {
 }
 export async function POST(request: NextRequest, { params }: Context) {
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     const form = await request.formData();
     const data = await prescriptionSchema.validate(JSON.parse(String(form.get('record'))), { stripUnknown: true });
     const file = form.get('attachment');

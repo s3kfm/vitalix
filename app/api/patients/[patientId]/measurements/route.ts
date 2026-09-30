@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { listMeasurementsSchema } from '@/src/lib/validations/measurements';
 
 /**
@@ -14,8 +14,9 @@ import { listMeasurementsSchema } from '@/src/lib/validations/measurements';
 export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
 
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
 
     const { searchParams } = request.nextUrl;
     const raw = {

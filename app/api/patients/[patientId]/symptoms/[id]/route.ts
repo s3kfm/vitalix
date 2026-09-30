@@ -3,14 +3,15 @@ import { and, eq, sql } from 'drizzle-orm';
 import { string, ValidationError } from 'yup';
 import { db } from '@/src/db';
 import { symptoms } from '@/src/db/symptoms';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 
 // The only update currently supported is marking an episode resolved now.
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ patientId: string; id: string }> }) {
   try {
     const id = await string().uuid().required().validate((await params).id);
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     const [record] = await db.update(symptoms).set({
       resolvedAt: sql`coalesce(${symptoms.resolvedAt}, now())`,
       updatedAt: new Date(),

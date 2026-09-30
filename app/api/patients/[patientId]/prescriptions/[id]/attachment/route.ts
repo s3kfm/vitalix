@@ -6,6 +6,7 @@ import { getPatient } from '@/src/db/patient';
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ patientId: string; id: string }> }) {
   try {
     const { patientId, id } = await params;
+    // Not requirePatient: this binary endpoint answers with an empty body, not JSON.
     const patient = await getPatient(patientId);
     if (!patient) return new NextResponse(null, { status: 404 });
     if (!/^[0-9a-f-]{36}$/i.test(id)) return new NextResponse(null, { status: 400 });

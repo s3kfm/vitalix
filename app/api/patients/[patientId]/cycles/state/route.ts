@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { getCurrentCycleState } from '@/src/lib/cycles/service';
 import { cycleApiError } from '@/src/lib/cycles/http';
 
@@ -8,8 +8,9 @@ export async function GET(
   { params }: { params: Promise<{ patientId: string }> },
 ) {
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     return NextResponse.json(await getCurrentCycleState(patient.id), {
       headers: { 'Cache-Control': 'no-store' },
     });

@@ -10,6 +10,7 @@ import {
 } from '@/src/lib/cycles/service';
 import { cycleApiError } from '@/src/lib/cycles/http';
 type Context = { params: Promise<{ patientId: string; id: string }> };
+// Not requirePatient: a bad patient or id both answer "Observation not found."
 async function authorized(context: Context) {
   const { patientId, id } = await context.params;
   const patient = await getPatient(patientId);

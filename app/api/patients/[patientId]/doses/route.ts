@@ -3,14 +3,15 @@ import { and, desc, eq } from 'drizzle-orm';
 import { ValidationError } from 'yup';
 import { db } from '@/src/db';
 import { medications, medicationDoses } from '@/src/db/medications';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { period } from '@/src/lib/medications/schedule';
 import { createDoseSchema } from '@/src/lib/validations/medications';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     return NextResponse.json(await db.select().from(medicationDoses).where(eq(medicationDoses.patientId, patient.id)).orderBy(desc(medicationDoses.recordedAt), desc(medicationDoses.id)));
   } catch (error) {
     console.error('GET /api/patients/[patientId]/doses:', error);
@@ -20,8 +21,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
     const data = await createDoseSchema.validate(await request.json(), { stripUnknown: true });
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     const { timeZone, ...values } = data;
     let name = data.name!;
     if (data.medicineId) {

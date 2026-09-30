@@ -3,14 +3,15 @@ import { desc, eq } from 'drizzle-orm';
 import { ValidationError } from 'yup';
 import { db } from '@/src/db';
 import { symptoms } from '@/src/db/symptoms';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { createSymptomSchema } from '@/src/lib/validations/symptoms';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
     // Same demo identity as measurements until session authentication is wired.
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     const rows = await db.select().from(symptoms).where(eq(symptoms.patientId, patient.id))
       .orderBy(desc(symptoms.onsetAt), desc(symptoms.id));
     return NextResponse.json(rows);
@@ -23,8 +24,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
   try {
     const data = await createSymptomSchema.validate(await request.json(), { stripUnknown: true });
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     const [record] = await db.insert(symptoms).values({
       patientId: patient.id,
       code: { text: data.name },

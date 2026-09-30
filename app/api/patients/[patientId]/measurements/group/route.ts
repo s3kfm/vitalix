@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { measurementGroups, measurements, measurementValues, measurementDefinitions } from '@/src/db/measurements';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { createMeasurementGroupSchema } from '@/src/lib/validations/measurements';
 import { seedDefinitions } from '@/src/db/seed';
 import { validateExtractedMeasurement } from '@/src/lib/assistant/validate-measurement';
@@ -18,8 +18,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     // Ensure definitions are seeded
     await seedDefinitions();
-    const patient = await getPatient((await params).patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
 
     const body = await request.json();
     const data = await createMeasurementGroupSchema.validate(body);

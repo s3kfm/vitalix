@@ -3,15 +3,16 @@ import { and, eq } from 'drizzle-orm';
 import { string, ValidationError } from 'yup';
 import { db } from '@/src/db';
 import { medicationDoses } from '@/src/db/medications';
-import { getPatient } from '@/src/db/patient';
+import { requirePatient } from '@/src/lib/api/patient';
 import { createDoseSchema } from '@/src/lib/validations/medications';
 type Context = { params: Promise<{ patientId: string; id: string }> };
 async function change(request: NextRequest, context: Context, remove: boolean) {
   try {
-    const { patientId, id } = await context.params;
+    const { id } = await context.params;
     await string().uuid().required().validate(id);
-    const patient = await getPatient(patientId);
-    if (!patient) return NextResponse.json({ error: 'Patient not found.' }, { status: 404 });
+    const found = await requirePatient(context.params);
+    if (!found.ok) return found.response;
+    const { patient } = found;
     const where = and(eq(medicationDoses.id, id), eq(medicationDoses.patientId, patient.id));
     const [existing] = await db.select().from(medicationDoses).where(where);
     if (!existing) return NextResponse.json({ error: 'Dose not found.' }, { status: 404 });
