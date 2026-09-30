@@ -11,6 +11,7 @@ const medication = { key: 'm1', kind: 'medication', data: { name: 'Vitamin D', s
 const dose = { key: 'd1', kind: 'dose', data: { medicationName: 'Vitamin D', medicineId: 'm1', dose: '1 tablet', status: 'Taken', takenAt: '2025-01-01T08:00:00Z' } };
 const measurement = { key: 'v1', kind: 'measurement', data: { definitionSlug: 'weight', observedAt: '2025-01-01T12:00:00Z', values: [{ componentKey: 'value', result: { type: 'quantity', value: { value: 70, unit: 'kg' } } }] } };
 const batch = records => ({ summary: 'Review your records', records });
+const patientUrl = path => `/api${path}`;
 const json = (body, status = 201) => Response.json(body, { status });
 
 test('mixed batch saves through existing APIs, creates medication before dependent dose, and omits chat', async () => {
@@ -20,7 +21,7 @@ test('mixed batch saves through existing APIs, creates medication before depende
     calls.push({ url, body });
     return json(url.includes('measurements') ? { group: { id } } : { id });
   };
-  const results = await saveChangeset(batch([dose, symptom, measurement, medication]), [], () => {}, request);
+  const results = await saveChangeset(batch([dose, symptom, measurement, medication]), patientUrl, [], () => {}, request);
   assert.equal(results.length, 4);
   assert.ok(results.every(result => result.status === 'saved'));
   assert.equal(calls[0].url, '/api/medications');
@@ -41,10 +42,10 @@ test('validation failure does not prevent other saves and retry skips saved reco
     return json({ id });
   };
   const input = batch([symptom, medication]);
-  const first = await saveChangeset(input, [], () => {}, request);
+  const first = await saveChangeset(input, patientUrl, [], () => {}, request);
   assert.equal(first[0].status, 'failed');
   assert.equal(first[1].status, 'saved');
-  const second = await saveChangeset(input, first, () => {}, request);
+  const second = await saveChangeset(input, patientUrl, first, () => {}, request);
   assert.ok(second.every(result => result.status === 'saved'));
   assert.equal(calls.filter(url => url === '/api/medications').length, 1);
 });
@@ -53,12 +54,12 @@ test('lost responses and server failures are not retried, and dependent doses do
   let calls = 0;
   const request = async () => { calls++; throw new Error('Connection lost'); };
   const input = batch([medication, dose]);
-  const first = await saveChangeset(input, [], () => {}, request);
+  const first = await saveChangeset(input, patientUrl, [], () => {}, request);
   assert.equal(first[0].status, 'uncertain');
   assert.equal(first[1].status, 'failed');
-  await saveChangeset(input, first, () => {}, request);
+  await saveChangeset(input, patientUrl, first, () => {}, request);
   assert.equal(calls, 1);
-  const failed = await saveChangeset(batch([symptom]), [], () => {}, async () => json({ error: 'Database error' }, 500));
+  const failed = await saveChangeset(batch([symptom]), patientUrl, [], () => {}, async () => json({ error: 'Database error' }, 500));
   assert.equal(failed[0].status, 'uncertain');
 });
 
@@ -67,7 +68,7 @@ test('invalid dates and schedules are rejected before writing; duplicate keys an
   const request = async () => { calls++; return json({ id }); };
   const duplicateSchedule = { ...medication, data: { ...medication.data, schedule: ['08:00', '08:00'] } };
   const futureSymptom = { ...symptom, data: { ...symptom.data, onsetAt: '2999-01-01T00:00:00Z' } };
-  const result = await saveChangeset(batch([duplicateSchedule, futureSymptom]), [], () => {}, request);
+  const result = await saveChangeset(batch([duplicateSchedule, futureSymptom]), patientUrl, [], () => {}, request);
   assert.ok(result.every(item => item.status === 'failed'));
   assert.equal(calls, 0);
   assert.equal(changesetSchema.safeParse(batch([symptom, symptom])).success, false);
