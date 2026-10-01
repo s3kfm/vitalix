@@ -1,8 +1,8 @@
-import type { MeasurementWithValues } from '@/src/db/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { db } from '@/src/db';
-import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
+import { measurements, measurementDefinitions } from '@/src/db/measurements';
+import { withMeasurementDetails } from '@/src/db/measurement-details';
 import { requirePatient } from '@/src/lib/api/patient';
 import { listMeasurementsSchema } from '@/src/lib/validations/measurements';
 
@@ -58,35 +58,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .limit(query.limit!)
       .offset(query.offset!);
 
-    // Attach values + definition name to each measurement
-    const result: MeasurementWithValues[] = await Promise.all(
-      rows.map(async (m) => {
-        const vals = await db
-          .select()
-          .from(measurementValues)
-          .where(eq(measurementValues.measurementId, m.id));
-
-        const def = await db
-          .select({ name: measurementDefinitions.name, slug: measurementDefinitions.slug })
-          .from(measurementDefinitions)
-          .where(eq(measurementDefinitions.id, m.definitionId))
-          .limit(1);
-
-        const group = await db
-          .select({ source: measurementGroups.source })
-          .from(measurementGroups)
-          .where(eq(measurementGroups.id, m.groupId))
-          .limit(1);
-
-        return {
-          ...m,
-          definitionName: def[0]?.name ?? null,
-          definitionSlug: def[0]?.slug ?? null,
-          groupSource: group[0]?.source ?? null,
-          values: vals,
-        };
-      })
-    );
+    const result = await withMeasurementDetails(rows);
 
     return NextResponse.json(result);
   } catch (error) {

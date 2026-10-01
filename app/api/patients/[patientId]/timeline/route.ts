@@ -3,7 +3,8 @@ import { desc, eq } from 'drizzle-orm';
 import { db } from '@/src/db';
 import { symptoms } from '@/src/db/symptoms';
 import { medications, medicationDoses } from '@/src/db/medications';
-import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
+import { measurements } from '@/src/db/measurements';
+import { withMeasurementDetails } from '@/src/db/measurement-details';
 import { requirePatient } from '@/src/lib/api/patient';
 import type { SymptomRecord, DoseRecord, ApiMeasurement, MedicationRecord } from '@/src/db/types';
 
@@ -70,26 +71,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .where(eq(measurements.patientId, patient.id))
       .orderBy(desc(measurements.observedAt), desc(measurements.id));
 
-    const measurementItems: TimelineItem[] = await Promise.all(
-      measurementRows.map(async (m) => {
-        const vals = await db
-          .select()
-          .from(measurementValues)
-          .where(eq(measurementValues.measurementId, m.id));
-
-        const def = await db
-          .select({ name: measurementDefinitions.name, slug: measurementDefinitions.slug })
-          .from(measurementDefinitions)
-          .where(eq(measurementDefinitions.id, m.definitionId))
-          .limit(1);
-
-        const group = await db
-          .select({ source: measurementGroups.source })
-          .from(measurementGroups)
-          .where(eq(measurementGroups.id, m.groupId))
-          .limit(1);
-
-        const displayValue = vals
+    const measurementItems: TimelineItem[] = (await withMeasurementDetails(measurementRows)).map(
+      (m) => {
+        const displayValue = m.values
           .map((v) => {
             const r = v.result;
             if (r.type === 'quantity' && r.value && typeof r.value === 'object') {
@@ -102,29 +86,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           .filter(Boolean)
           .join(' / ');
 
-        const payload = {
-          ...m,
-          definitionName: def[0]?.name ?? null,
-          definitionSlug: def[0]?.slug ?? null,
-          groupSource: group[0]?.source ?? null,
-          values: vals,
-        } as unknown as ApiMeasurement;
-
         return {
           id: m.id,
           kind: 'measurement' as const,
           timestamp: m.observedAt.toISOString(),
           createdAt: m.createdAt.toISOString(),
-          title: def[0]?.name ?? 'Measurement',
+          title: m.definitionName ?? 'Measurement',
           detail: [
             displayValue,
             m.status !== 'final' ? m.status : '',
-            group[0]?.source ? `via ${group[0].source}` : '',
+            m.groupSource ? `via ${m.groupSource}` : '',
             m.notes,
-          ].filter(Boolean).join(' · '),
-          payload,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          payload: m as unknown as ApiMeasurement,
         };
-      })
+      },
     );
 
     // 4. Medications (creation events)
