@@ -39,7 +39,6 @@ export function OverviewPage() {
           </Link>
         </div>
       </section>
-      {/* <PinnedMeasurements/> */}
       <div className="overview-columns">
         <DashboardTimeline />
         <div className="overview-aside">
