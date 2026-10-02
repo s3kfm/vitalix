@@ -9,5 +9,10 @@ export default async function WorkspaceLayout({ children }: { children: ReactNod
   const user = await currentUser();
   if (!user) redirect('/login');
   if (!(await listPatients(user.id)).length) redirect('/enroll');
-  return <HealthRecordsProvider>{children}<AssistantBubble /></HealthRecordsProvider>;
+  return (
+    <HealthRecordsProvider>
+      {children}
+      <AssistantBubble />
+    </HealthRecordsProvider>
+  );
 }

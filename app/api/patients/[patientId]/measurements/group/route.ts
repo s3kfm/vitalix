@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/src/db';
-import { measurementGroups, measurements, measurementValues, measurementDefinitions } from '@/src/db/measurements';
+import {
+  measurementGroups,
+  measurements,
+  measurementValues,
+  measurementDefinitions,
+} from '@/src/db/measurements';
 import { requirePatient } from '@/src/lib/api/patient';
 import { createMeasurementGroupSchema } from '@/src/lib/validations/measurements';
 import { seedDefinitions } from '@/src/db/seed';
@@ -14,7 +19,10 @@ import type { MeasurementResult } from '@/src/lib/measurements/result';
  * Shared metadata (source, notes, messages) applies to all observations.
  * Each observation becomes its own measurement row inside the group.
  */
-export async function POST(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ patientId: string }> },
+) {
   try {
     // Ensure definitions are seeded
     await seedDefinitions();
@@ -38,7 +46,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (!def) {
         return NextResponse.json(
           { error: `Unknown measurement definition: "${obs.definitionSlug}"` },
-          { status: 400 }
+          { status: 400 },
         );
       }
       slugToDef.set(obs.definitionSlug, def);
@@ -46,7 +54,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (data.source === 'ai') {
       for (const observation of data.observations) {
-        const error = validateExtractedMeasurement(observation, slugToDef.get(observation.definitionSlug)!.components);
+        const error = validateExtractedMeasurement(
+          observation,
+          slugToDef.get(observation.definitionSlug)!.components,
+        );
         if (error) return NextResponse.json({ error }, { status: 400 });
       }
       // Chat and attachments are transient, including when an API caller supplies them.
@@ -72,7 +83,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Create each measurement and its values sequentially.
-    const created: Array<{ measurement: typeof measurements.$inferSelect; values: typeof measurementValues.$inferSelect[] }> = [];
+    const created: Array<{
+      measurement: typeof measurements.$inferSelect;
+      values: (typeof measurementValues.$inferSelect)[];
+    }> = [];
 
     for (const obs of data.observations) {
       const def = slugToDef.get(obs.definitionSlug)!;
@@ -101,7 +115,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             result: v.result as MeasurementResult,
             interpretation: v.interpretation ?? null,
             referenceRanges: v.referenceRanges ?? null,
-          }))
+          })),
         )
         .returning();
 
@@ -120,7 +134,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           values: c.values,
         })),
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error('POST /api/patients/[patientId]/measurements/group error:', error);

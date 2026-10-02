@@ -11,8 +11,20 @@ export const catalog: CatalogEntry[] = [
     category: 'vitals',
     description: 'Systolic and diastolic blood pressure',
     components: [
-      { key: 'systolic', name: 'Systolic', loincCode: '8480-6', resultType: 'quantity', unit: 'mmHg' },
-      { key: 'diastolic', name: 'Diastolic', loincCode: '8462-4', resultType: 'quantity', unit: 'mmHg' },
+      {
+        key: 'systolic',
+        name: 'Systolic',
+        loincCode: '8480-6',
+        resultType: 'quantity',
+        unit: 'mmHg',
+      },
+      {
+        key: 'diastolic',
+        name: 'Diastolic',
+        loincCode: '8462-4',
+        resultType: 'quantity',
+        unit: 'mmHg',
+      },
     ],
   },
   {
@@ -32,7 +44,13 @@ export const catalog: CatalogEntry[] = [
     category: 'vitals',
     description: 'Body temperature',
     components: [
-      { key: 'value', name: 'Temperature', loincCode: '8310-5', resultType: 'quantity', unit: '°C' },
+      {
+        key: 'value',
+        name: 'Temperature',
+        loincCode: '8310-5',
+        resultType: 'quantity',
+        unit: '°C',
+      },
     ],
   },
   {
@@ -42,7 +60,13 @@ export const catalog: CatalogEntry[] = [
     category: 'vitals',
     description: 'Heart rate at rest',
     components: [
-      { key: 'value', name: 'Heart rate', loincCode: '8867-4', resultType: 'quantity', unit: 'bpm' },
+      {
+        key: 'value',
+        name: 'Heart rate',
+        loincCode: '8867-4',
+        resultType: 'quantity',
+        unit: 'bpm',
+      },
     ],
   },
   {

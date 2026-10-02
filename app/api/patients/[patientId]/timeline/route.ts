@@ -20,7 +20,10 @@ export interface TimelineItem {
   payload: SymptomRecord | DoseRecord | ApiMeasurement | MedicationRecord;
 }
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ patientId: string }> },
+) {
   try {
     const found = await requirePatient(params);
     if (!found.ok) return found.response;
@@ -43,7 +46,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         s.severity !== null ? `${s.severity}/10 severity` : '',
         s.resolvedAt ? 'Resolved' : 'Ongoing',
         s.notes,
-      ].filter(Boolean).join(' · '),
+      ]
+        .filter(Boolean)
+        .join(' · '),
       payload: s as unknown as SymptomRecord,
     }));
 
@@ -124,28 +129,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         med.schedule.length ? `Schedule: ${med.schedule.join(', ')}` : 'As needed',
         med.active ? 'Active' : 'Inactive',
         med.notes,
-      ].filter(Boolean).join(' · '),
+      ]
+        .filter(Boolean)
+        .join(' · '),
       payload: med as unknown as MedicationRecord,
     }));
 
     // Merge & sort chronologically descending
-    const allItems = [
-      ...symptomItems,
-      ...doseItems,
-      ...measurementItems,
-      ...medicationItems,
-    ].sort(
+    const allItems = [...symptomItems, ...doseItems, ...measurementItems, ...medicationItems].sort(
       (a, b) =>
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime() ||
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
     return NextResponse.json(allItems);
   } catch (error) {
     console.error('GET /api/patients/[patientId]/timeline:', error);
-    return NextResponse.json(
-      { error: 'Could not load timeline.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Could not load timeline.' }, { status: 500 });
   }
 }

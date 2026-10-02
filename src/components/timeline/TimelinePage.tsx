@@ -13,7 +13,12 @@ const viewOptions = ['All', 'Symptom', 'Dose', 'Measurement', 'Medication'] as c
 type View = (typeof viewOptions)[number];
 
 export function TimelinePage() {
-  const { data: items, isLoading, isError, refetch } = useQuery<TimelineItemType[]>({
+  const {
+    data: items,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery<TimelineItemType[]>({
     queryKey: ['timeline'],
   });
 
@@ -25,11 +30,7 @@ export function TimelinePage() {
       if (filter === 'All') return true;
       return item.kind === filter.toLowerCase();
     })
-    .filter((item) =>
-      `${item.title} ${item.detail}`
-        .toLowerCase()
-        .includes(query.toLowerCase())
-    );
+    .filter((item) => `${item.title} ${item.detail}`.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div className="page-stack">
@@ -77,9 +78,7 @@ export function TimelinePage() {
 
           {!isLoading &&
             !isError &&
-            filtered.map((item) => (
-              <TimelineItem key={item.id} item={item} />
-            ))}
+            filtered.map((item) => <TimelineItem key={item.id} item={item} />)}
 
           {!isLoading && !isError && !filtered.length && (
             <EmptyState

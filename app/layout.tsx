@@ -11,13 +11,16 @@ const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin']
 
 export const metadata: Metadata = {
   title: 'Vitalix · Your health, together',
-  description: 'Your personal health record. Track measurements, symptoms, and medications in one place.',
+  description:
+    'Your personal health record. Track measurements, symptoms, and medications in one place.',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body><CustomProvider>{children}</CustomProvider></body>
+      <body>
+        <CustomProvider>{children}</CustomProvider>
+      </body>
     </html>
   );
 }

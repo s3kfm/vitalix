@@ -6,13 +6,19 @@ import { symptoms } from '@/src/db/symptoms';
 import { requirePatient } from '@/src/lib/api/patient';
 import { createSymptomSchema } from '@/src/lib/validations/symptoms';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ patientId: string }> },
+) {
   try {
     // Same demo identity as measurements until session authentication is wired.
     const found = await requirePatient(params);
     if (!found.ok) return found.response;
     const { patient } = found;
-    const rows = await db.select().from(symptoms).where(eq(symptoms.patientId, patient.id))
+    const rows = await db
+      .select()
+      .from(symptoms)
+      .where(eq(symptoms.patientId, patient.id))
       .orderBy(desc(symptoms.onsetAt), desc(symptoms.id));
     return NextResponse.json(rows);
   } catch (error) {
@@ -21,21 +27,27 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ patientId: string }> },
+) {
   try {
     const data = await createSymptomSchema.validate(await request.json(), { stripUnknown: true });
     const found = await requirePatient(params);
     if (!found.ok) return found.response;
     const { patient } = found;
-    const [record] = await db.insert(symptoms).values({
-      patientId: patient.id,
-      code: { text: data.name },
-      onsetAt: new Date(data.onsetAt),
-      resolvedAt: data.resolvedAt ? new Date(data.resolvedAt) : null,
-      severity: data.severity ?? null,
-      bodySite: data.location ? { text: data.location } : null,
-      notes: data.notes || null,
-    }).returning();
+    const [record] = await db
+      .insert(symptoms)
+      .values({
+        patientId: patient.id,
+        code: { text: data.name },
+        onsetAt: new Date(data.onsetAt),
+        resolvedAt: data.resolvedAt ? new Date(data.resolvedAt) : null,
+        severity: data.severity ?? null,
+        bodySite: data.location ? { text: data.location } : null,
+        notes: data.notes || null,
+      })
+      .returning();
     return NextResponse.json(record, { status: 201 });
   } catch (error) {
     if (error instanceof ValidationError || error instanceof SyntaxError) {

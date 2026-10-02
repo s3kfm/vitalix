@@ -25,17 +25,19 @@ export function MeasurementTable({ query }: { query: string }) {
     queryKey: ['measurements', 'latest', 'by-definition'],
     enabled: !!definitions.data?.length,
     queryFn: async () => {
-      const slugs = definitions.data!.map(d => d.slug);
+      const slugs = definitions.data!.map((d) => d.slug);
       const results = await Promise.all(
         slugs.map(async (slug) => {
           try {
-            const res = await fetch(patientUrl(`/measurements/latest?definitionSlug=${encodeURIComponent(slug)}`));
+            const res = await fetch(
+              patientUrl(`/measurements/latest?definitionSlug=${encodeURIComponent(slug)}`),
+            );
             if (!res.ok) return null;
-            return await res.json() as ApiMeasurement | null;
+            return (await res.json()) as ApiMeasurement | null;
           } catch {
             return null;
           }
-        })
+        }),
       );
       return results;
     },
@@ -46,7 +48,7 @@ export function MeasurementTable({ query }: { query: string }) {
 
   // Build the list: definition name + latest measurement (if exists)
   const rows = (latestQueries.data ?? [])
-    .map(m => {
+    .map((m) => {
       if (!m) return null;
       const disp = displayValue(m);
       return {
@@ -61,11 +63,12 @@ export function MeasurementTable({ query }: { query: string }) {
       };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null)
-    .filter(r => r.name.toLowerCase().includes(query.toLowerCase()));
+    .filter((r) => r.name.toLowerCase().includes(query.toLowerCase()));
 
-  const selectedMeasurements = latestQueries.data
-    ?.filter((m): m is ApiMeasurement => m !== null && m.definitionSlug === selected)
-    .flatMap(m => [m]) ?? [];
+  const selectedMeasurements =
+    latestQueries.data
+      ?.filter((m): m is ApiMeasurement => m !== null && m.definitionSlug === selected)
+      .flatMap((m) => [m]) ?? [];
 
   return (
     <>
@@ -95,7 +98,7 @@ export function MeasurementTable({ query }: { query: string }) {
                 </td>
               </tr>
             )}
-            {rows.map(m => (
+            {rows.map((m) => (
               <tr key={m.id}>
                 <td>
                   <button className="text-button" onClick={() => setSelected(m.slug)}>
@@ -108,9 +111,7 @@ export function MeasurementTable({ query }: { query: string }) {
                 </td>
                 <td>{formatDate(m.recordedAt)}</td>
                 <td>
-                  <span className="badge neutral">
-                    {m.source === 'ai' ? 'AI' : 'Manual entry'}
-                  </span>
+                  <span className="badge neutral">{m.source === 'ai' ? 'AI' : 'Manual entry'}</span>
                 </td>
                 <td>
                   <button
@@ -135,14 +136,14 @@ export function MeasurementTable({ query }: { query: string }) {
       )}
       <Modal open={selected !== null} onClose={() => setSelected(null)} size="sm">
         <Modal.Header>
-          <Modal.Title>{rows.find(r => r.slug === selected)?.name ?? selected}</Modal.Title>
+          <Modal.Title>{rows.find((r) => r.slug === selected)?.name ?? selected}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p className="muted mb-4">Your recorded history · Entered manually</p>
           {selected &&
             selectedMeasurements
               .sort((a, b) => b.observedAt.localeCompare(a.observedAt))
-              .map(m => {
+              .map((m) => {
                 const disp = displayValue(m);
                 return (
                   <div className="history-item" key={m.id}>

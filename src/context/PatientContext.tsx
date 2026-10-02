@@ -17,7 +17,13 @@ interface PatientContextValue {
 }
 const Context = createContext<PatientContextValue | null>(null);
 
-export function PatientProvider({ children, initialPatients }: { children: ReactNode; initialPatients: Patient[] }) {
+export function PatientProvider({
+  children,
+  initialPatients,
+}: {
+  children: ReactNode;
+  initialPatients: Patient[];
+}) {
   const [patients, setPatients] = useState<Patient[]>(initialPatients);
   const [patientId, setPatientId] = useState<string | null>(initialPatients[0]?.id ?? null);
   const [loading, setLoading] = useState(false);
@@ -35,7 +41,9 @@ export function PatientProvider({ children, initialPatients }: { children: React
         const list: Patient[] = await response.json();
         if (controller.signal.aborted) return;
         setPatients(list);
-        setPatientId(current => list.some(p => p.id === current) ? current : list[0]?.id ?? null);
+        setPatientId((current) =>
+          list.some((p) => p.id === current) ? current : (list[0]?.id ?? null),
+        );
       } catch {
         if (!controller.signal.aborted) setError('Could not load patients.');
       } finally {
@@ -45,32 +53,49 @@ export function PatientProvider({ children, initialPatients }: { children: React
     void load();
     return () => controller.abort();
   }, [revision]);
-  const patient = patients.find(p => p.id === patientId) ?? null;
+  const patient = patients.find((p) => p.id === patientId) ?? null;
   async function enrollPatient(details: PatientDetails) {
     const response = await fetch('/api/patients', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(details),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(details),
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error || 'Could not enroll patient.');
     const created: Patient = body;
-    setPatients(current => [...current, created]);
+    setPatients((current) => [...current, created]);
     setPatientId(created.id);
   }
   async function updatePatient(id: string, details: PatientDetails) {
     const response = await fetch(`/api/patients/${id}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(details),
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(details),
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error || 'Could not update patient.');
-    setPatients(current => current.map(item => item.id === id ? body as Patient : item));
+    setPatients((current) => current.map((item) => (item.id === id ? (body as Patient) : item)));
   }
-  return <Context.Provider value={{ patients, patient, loading, error,
-    selectPatient: setPatientId, enrollPatient, updatePatient, reload: () => setRevision(n => n + 1),
-    patientUrl: path => {
-      if (!patient) throw new Error('Select a patient first.');
-      return `/api/patients/${patient.id}${path}`;
-    },
-  }}>{children}</Context.Provider>;
+  return (
+    <Context.Provider
+      value={{
+        patients,
+        patient,
+        loading,
+        error,
+        selectPatient: setPatientId,
+        enrollPatient,
+        updatePatient,
+        reload: () => setRevision((n) => n + 1),
+        patientUrl: (path) => {
+          if (!patient) throw new Error('Select a patient first.');
+          return `/api/patients/${patient.id}${path}`;
+        },
+      }}
+    >
+      {children}
+    </Context.Provider>
+  );
 }
 
 export function usePatient() {

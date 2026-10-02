@@ -11,9 +11,11 @@ import { listMeasurementsSchema } from '@/src/lib/validations/measurements';
  * List measurements for the authenticated patient.
  * Query: ?definitionSlug= &from= &to= &limit= &offset=
  */
-export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ patientId: string }> },
+) {
   try {
-
     const found = await requirePatient(params);
     if (!found.ok) return found.response;
     const { patient } = found;
@@ -32,9 +34,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const conditions = [eq(measurements.patientId, patient.id)];
 
     if (query.definitionSlug) {
-      const defs = await db 
+      const defs = await db
         .select({ id: measurementDefinitions.id })
-        .from(measurementDefinitions) 
+        .from(measurementDefinitions)
         .where(eq(measurementDefinitions.slug, query.definitionSlug))
         .limit(1);
 

@@ -6,7 +6,11 @@ import { changesetSchema } from './changeset';
 function currentLocalTime(timezone: string): string {
   try {
     const now = new Date();
-    return now.toLocaleString('sv-SE', { timeZone: timezone, dateStyle: 'long', timeStyle: 'long' });
+    return now.toLocaleString('sv-SE', {
+      timeZone: timezone,
+      dateStyle: 'long',
+      timeStyle: 'long',
+    });
   } catch {
     // Fall back to UTC if the timezone string is invalid (shouldn't happen; validated in route).
     return new Date().toISOString();
@@ -30,16 +34,26 @@ confirmRecords displays the changeset for the user to explicitly approve. It doe
 Be concise. Propose records immediately instead of asking clarifying questions. Assume reasonable defaults unless the user explicitly contradicts them: use now for missing timestamps, today for missing dates, and the most obvious match for ambiguous medication names. Only ask when the input is genuinely incomplete (e.g. missing a required value with no reasonable default) or the user directly asks a question. Never prescribe, diagnose, or recommend dose changes. Users approve or correct in the confirmation card — use it as the primary review point. User chat is temporary; only approved health records are saved.`,
     tools: {
       getRecordContext: tool({
-        description: 'Read the current medications, symptoms, and supported measurement catalogue. This does not save health records.',
+        description:
+          'Read the current medications, symptoms, and supported measurement catalogue. This does not save health records.',
         inputSchema: z.object({}),
         execute: options.getRecordContext,
       }),
       confirmRecords: tool({
-        description: 'Show a structured changeset for explicit user confirmation before the client saves each record through its API. Wait for the tool result.',
+        description:
+          'Show a structured changeset for explicit user confirmation before the client saves each record through its API. Wait for the tool result.',
         inputSchema: changesetSchema,
         outputSchema: z.object({
           status: z.enum(['saved', 'partial', 'cancelled']),
-          records: z.array(z.object({ key: z.string(), kind: z.enum(['symptom', 'resolveSymptom', 'medication', 'dose', 'measurement']), status: z.enum(['saved', 'failed', 'uncertain']), id: z.string().optional(), error: z.string().optional() })),
+          records: z.array(
+            z.object({
+              key: z.string(),
+              kind: z.enum(['symptom', 'resolveSymptom', 'medication', 'dose', 'measurement']),
+              status: z.enum(['saved', 'failed', 'uncertain']),
+              id: z.string().optional(),
+              error: z.string().optional(),
+            }),
+          ),
         }),
       }),
     },

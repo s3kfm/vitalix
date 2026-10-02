@@ -1,6 +1,20 @@
 import type { MedicationRecord, DoseRecord } from './db/types';
 
-export type Medicine = Pick<MedicationRecord, 'id' | 'name' | 'strength' | 'dose' | 'schedule' | 'notes' | 'active' | 'startDate' | 'endDate' | 'endedReason' | 'createdAt' | 'updatedAt'>;
+export type Medicine = Pick<
+  MedicationRecord,
+  | 'id'
+  | 'name'
+  | 'strength'
+  | 'dose'
+  | 'schedule'
+  | 'notes'
+  | 'active'
+  | 'startDate'
+  | 'endDate'
+  | 'endedReason'
+  | 'createdAt'
+  | 'updatedAt'
+>;
 export type DoseLog = DoseRecord;
 export interface Measurement {
   id: string;

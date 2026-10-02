@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and } from 'drizzle-orm';
 import { db } from '@/src/db';
-import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
+import {
+  measurements,
+  measurementValues,
+  measurementDefinitions,
+  measurementGroups,
+} from '@/src/db/measurements';
 import { requirePatient } from '@/src/lib/api/patient';
 import { updateMeasurementSchema } from '@/src/lib/validations/measurements';
 import type { MeasurementResult } from '@/src/lib/measurements/result';
@@ -12,12 +17,15 @@ import type { MeasurementResult } from '@/src/lib/measurements/result';
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ patientId: string; id: string }> }
+  { params }: { params: Promise<{ patientId: string; id: string }> },
 ) {
   try {
     const found = await requirePatient(params);
     if (!found.ok) return found.response;
-    const { patient, params: { id } } = found;
+    const {
+      patient,
+      params: { id },
+    } = found;
 
     const [measurement] = await db
       .select()
@@ -65,12 +73,15 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ patientId: string; id: string }> }
+  { params }: { params: Promise<{ patientId: string; id: string }> },
 ) {
   try {
     const found = await requirePatient(params);
     if (!found.ok) return found.response;
-    const { patient, params: { id } } = found;
+    const {
+      patient,
+      params: { id },
+    } = found;
 
     const [existing] = await db
       .select()
@@ -93,16 +104,11 @@ export async function PUT(
     if (data.method !== undefined) updateData.method = data.method;
     if (data.bodySite !== undefined) updateData.bodySite = data.bodySite;
 
-    await db
-      .update(measurements)
-      .set(updateData)
-      .where(eq(measurements.id, id));
+    await db.update(measurements).set(updateData).where(eq(measurements.id, id));
 
     // Replace values if provided
     if (data.values) {
-      await db
-        .delete(measurementValues)
-        .where(eq(measurementValues.measurementId, id));
+      await db.delete(measurementValues).where(eq(measurementValues.measurementId, id));
 
       await db.insert(measurementValues).values(
         data.values.map((v) => ({
@@ -111,16 +117,12 @@ export async function PUT(
           result: v.result as MeasurementResult,
           interpretation: v.interpretation ?? null,
           referenceRanges: v.referenceRanges ?? null,
-        }))
+        })),
       );
     }
 
     // Return updated measurement
-    const [updated] = await db
-      .select()
-      .from(measurements)
-      .where(eq(measurements.id, id))
-      .limit(1);
+    const [updated] = await db.select().from(measurements).where(eq(measurements.id, id)).limit(1);
 
     const values = await db
       .select()
@@ -143,12 +145,15 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ patientId: string; id: string }> }
+  { params }: { params: Promise<{ patientId: string; id: string }> },
 ) {
   try {
     const found = await requirePatient(params);
     if (!found.ok) return found.response;
-    const { patient, params: { id } } = found;
+    const {
+      patient,
+      params: { id },
+    } = found;
 
     const [existing] = await db
       .select()

@@ -12,15 +12,21 @@ function displayComponent(component: ApiMeasurement['values'][number]) {
     };
   }
   return {
-    value: typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' ? String(value) : '—',
+    value:
+      typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+        ? String(value)
+        : '—',
     unit: '',
   };
 }
 
-export function displayMeasurement(measurement: Pick<ApiMeasurement, 'values'>): { value: string; unit: string } {
+export function displayMeasurement(measurement: Pick<ApiMeasurement, 'values'>): {
+  value: string;
+  unit: string;
+} {
   const components = measurement.values.map(displayComponent);
   return {
-    value: components.length ? components.map(component => component.value).join('/') : '—',
+    value: components.length ? components.map((component) => component.value).join('/') : '—',
     unit: components[0]?.unit ?? '',
   };
 }

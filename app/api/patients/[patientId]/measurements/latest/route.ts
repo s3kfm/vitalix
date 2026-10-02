@@ -2,7 +2,12 @@ import type { MeasurementWithValues } from '@/src/db/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, and, desc, ne } from 'drizzle-orm';
 import { db } from '@/src/db';
-import { measurements, measurementValues, measurementDefinitions, measurementGroups } from '@/src/db/measurements';
+import {
+  measurements,
+  measurementValues,
+  measurementDefinitions,
+  measurementGroups,
+} from '@/src/db/measurements';
 import { requirePatient } from '@/src/lib/api/patient';
 
 /**
@@ -10,7 +15,10 @@ import { requirePatient } from '@/src/lib/api/patient';
  * Fetch the latest (most recently observed) measurement for the patient.
  * Query: ?definitionSlug= (optional — if provided, returns the latest for that definition)
  */
-export async function GET(request: NextRequest, { params }: { params: Promise<{ patientId: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ patientId: string }> },
+) {
   try {
     const found = await requirePatient(params);
     if (!found.ok) return found.response;
@@ -35,7 +43,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       if (!def) {
         return NextResponse.json(
           { error: `Unknown measurement definition: "${definitionSlug}"` },
-          { status: 400 }
+          { status: 400 },
         );
       }
 

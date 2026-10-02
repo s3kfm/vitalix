@@ -1,9 +1,22 @@
-import type { patients, measurementDefinitions, measurementGroups, measurements, measurementValues, symptoms, medications, medicationDoses } from './schema';
+import type {
+  patients,
+  measurementDefinitions,
+  measurementGroups,
+  measurements,
+  measurementValues,
+  symptoms,
+  medications,
+  medicationDoses,
+} from './schema';
 
 /** JSON transport converts database timestamps to ISO strings, preserving nullability. */
-export type Serialized<T> = T extends Date ? string : T extends readonly unknown[]
-  ? { [K in keyof T]: Serialized<T[K]> }
-  : T extends object ? { [K in keyof T]: Serialized<T[K]> } : T;
+export type Serialized<T> = T extends Date
+  ? string
+  : T extends readonly unknown[]
+    ? { [K in keyof T]: Serialized<T[K]> }
+    : T extends object
+      ? { [K in keyof T]: Serialized<T[K]> }
+      : T;
 
 export type Patient = typeof patients.$inferSelect;
 export type NewPatient = typeof patients.$inferInsert;

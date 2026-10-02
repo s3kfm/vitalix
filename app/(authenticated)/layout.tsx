@@ -9,14 +9,21 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
   const user = await currentUser();
   if (!user) redirect('/login');
   const patients = await listPatients(user.id);
-  return <Providers initialPatients={patients}>
-    <a className="skip-link" href="#main-content">Skip to content</a>
-    <div className="app-shell">
-      <Header email={user.email} />
-      <div className="main-shell">
-        <main id="main-content">{children}</main>
-        <footer><span>Vitalix · Your personal health record</span><span>Your health, together</span></footer>
+  return (
+    <Providers initialPatients={patients}>
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
+      <div className="app-shell">
+        <Header email={user.email} />
+        <div className="main-shell">
+          <main id="main-content">{children}</main>
+          <footer>
+            <span>Vitalix · Your personal health record</span>
+            <span>Your health, together</span>
+          </footer>
+        </div>
       </div>
-    </div>
-  </Providers>;
+    </Providers>
+  );
 }

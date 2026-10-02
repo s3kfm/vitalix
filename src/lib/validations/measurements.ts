@@ -26,7 +26,23 @@ const ratioValue = yup.object({
 });
 
 const measurementResult = yup.object({
-  type: yup.string().oneOf(['quantity', 'coded', 'absent', 'range', 'ratio', 'sampledData', 'period', 'string', 'time', 'dateTime', 'boolean', 'integer']).required(),
+  type: yup
+    .string()
+    .oneOf([
+      'quantity',
+      'coded',
+      'absent',
+      'range',
+      'ratio',
+      'sampledData',
+      'period',
+      'string',
+      'time',
+      'dateTime',
+      'boolean',
+      'integer',
+    ])
+    .required(),
   value: yup.mixed().required(),
 });
 
@@ -58,14 +74,17 @@ const observationInput = yup.object({
 export const createMeasurementGroupSchema = yup.object({
   source: yup.string().oneOf(['manual', 'ai']).default('manual'),
   observedAt: yup.string().optional(), // default for all observations
-  notes: yup.string().optional(),       // group-level notes
-  messages: yup.array().of(
-    yup.object({
-      role: yup.string().oneOf(['user', 'assistant', 'system']).required(),
-      content: yup.string().required(),
-      timestamp: yup.string().optional(),
-    })
-  ).optional(),
+  notes: yup.string().optional(), // group-level notes
+  messages: yup
+    .array()
+    .of(
+      yup.object({
+        role: yup.string().oneOf(['user', 'assistant', 'system']).required(),
+        content: yup.string().required(),
+        timestamp: yup.string().optional(),
+      }),
+    )
+    .optional(),
   sourceMessageId: yup.string().optional(),
   observations: yup.array().of(observationInput).min(1).required(),
 });

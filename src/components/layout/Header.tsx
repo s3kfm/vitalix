@@ -11,7 +11,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Activity, LogOut, UserRound } from 'lucide-react';
 
-
 interface NavigationItem {
   href: string;
   label: string;
@@ -50,37 +49,86 @@ export function Header({ email, children }: { email: string; children?: ReactNod
     <header className="site-header">
       <div className="header-inner">
         <Link className="brand" href="/" aria-label="Vitalix home">
-          <span className="brand-icon"><Activity size={21} /></span>
+          <span className="brand-icon">
+            <Activity size={21} />
+          </span>
           Vitalix
         </Link>
-        {!enrolling && <nav aria-label="Main navigation">
-          {navigation.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-current={pathname === href ? 'page' : undefined}
-              className={pathname === href ? 'nav-link active' : 'nav-link'}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>}
-        {!enrolling && <Dropdown title={patient?.name ?? (loading ? 'Loading patients…' : 'Select patient')} placement="bottomEnd" disabled={loading || !!loadError} aria-label="Select patient">
-          {patients.map(item => <Dropdown.Item key={item.id} active={item.id === patient?.id} onSelect={() => selectPatient(item.id)}>{item.name}</Dropdown.Item>)}
-          {!!patients.length && <Dropdown.Item divider />}
-          {patient && <Dropdown.Item onSelect={() => setEditingPatient(patient)}>Edit patient</Dropdown.Item>}
-          <Dropdown.Item onSelect={() => router.push('/enroll')}>Enroll patient</Dropdown.Item>
-        </Dropdown>}
-        {editingPatient && <PatientDetailsModal key={editingPatient.id} patient={editingPatient} onClose={() => setEditingPatient(null)} />}
+        {!enrolling && (
+          <nav aria-label="Main navigation">
+            {navigation.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-current={pathname === href ? 'page' : undefined}
+                className={pathname === href ? 'nav-link active' : 'nav-link'}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        )}
+        {!enrolling && (
+          <Dropdown
+            title={patient?.name ?? (loading ? 'Loading patients…' : 'Select patient')}
+            placement="bottomEnd"
+            disabled={loading || !!loadError}
+            aria-label="Select patient"
+          >
+            {patients.map((item) => (
+              <Dropdown.Item
+                key={item.id}
+                active={item.id === patient?.id}
+                onSelect={() => selectPatient(item.id)}
+              >
+                {item.name}
+              </Dropdown.Item>
+            ))}
+            {!!patients.length && <Dropdown.Item divider />}
+            {patient && (
+              <Dropdown.Item onSelect={() => setEditingPatient(patient)}>
+                Edit patient
+              </Dropdown.Item>
+            )}
+            <Dropdown.Item onSelect={() => router.push('/enroll')}>Enroll patient</Dropdown.Item>
+          </Dropdown>
+        )}
+        {editingPatient && (
+          <PatientDetailsModal
+            key={editingPatient.id}
+            patient={editingPatient}
+            onClose={() => setEditingPatient(null)}
+          />
+        )}
         <Dropdown
           placement="bottomEnd"
           aria-label={`Account: ${email}`}
-          title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-            <UserRound size={18} aria-hidden="true" />
-            <span title={email} style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</span>
-          </span>}
+          title={
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <UserRound size={18} aria-hidden="true" />
+              <span
+                title={email}
+                style={{
+                  maxWidth: 180,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {email}
+              </span>
+            </span>
+          }
         >
-          <Dropdown.Item disabled={loggingOut} onSelect={() => { void logout(); }} icon={<LogOut size={16} aria-hidden="true" />}>{loggingOut ? 'Logging out…' : 'Log out'}</Dropdown.Item>
+          <Dropdown.Item
+            disabled={loggingOut}
+            onSelect={() => {
+              void logout();
+            }}
+            icon={<LogOut size={16} aria-hidden="true" />}
+          >
+            {loggingOut ? 'Logging out…' : 'Log out'}
+          </Dropdown.Item>
         </Dropdown>
         {children}
       </div>

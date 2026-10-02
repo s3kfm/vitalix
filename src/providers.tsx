@@ -13,12 +13,18 @@ function PatientQueries({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => {
     const scoped = createDefaultFetcher({ basePath: `/api/patients/${patient?.id}` });
     const catalogue = createDefaultFetcher({ basePath: '/api' });
-    return new QueryClient({ defaultOptions: { queries: {
-      queryFn: context => context.queryKey[0] === 'measurements' && context.queryKey[1] === 'definitions'
-        ? catalogue(context) : scoped(context),
-      staleTime: 60 * 1000,
-      retry: 1,
-    } } });
+    return new QueryClient({
+      defaultOptions: {
+        queries: {
+          queryFn: (context) =>
+            context.queryKey[0] === 'measurements' && context.queryKey[1] === 'definitions'
+              ? catalogue(context)
+              : scoped(context),
+          staleTime: 60 * 1000,
+          retry: 1,
+        },
+      },
+    });
   });
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
@@ -26,6 +32,17 @@ function PatientSession({ children }: { children: ReactNode }) {
   const { patient } = usePatient();
   return <PatientQueries key={patient?.id ?? 'no-patient'}>{children}</PatientQueries>;
 }
-export function Providers({ children, initialPatients }: { children: ReactNode; initialPatients: Patient[] }) {
-  return <PatientProvider initialPatients={initialPatients}><PatientSession>{children}</PatientSession><Toaster richColors position="top-right" /></PatientProvider>;
+export function Providers({
+  children,
+  initialPatients,
+}: {
+  children: ReactNode;
+  initialPatients: Patient[];
+}) {
+  return (
+    <PatientProvider initialPatients={initialPatients}>
+      <PatientSession>{children}</PatientSession>
+      <Toaster richColors position="top-right" />
+    </PatientProvider>
+  );
 }
